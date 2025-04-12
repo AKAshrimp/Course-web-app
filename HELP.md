@@ -1,4 +1,10 @@
 # Getting Started
+```./gradlew bootRun```
+http://localhost:8080/h2-console
+http://localhost:8080/
+jdbc:h2:file:./coursewebsite_db
+username : sa 
+password : password
 
 ### Reference Documentation
 For further reference, please consider the following sections:
