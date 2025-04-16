@@ -35,6 +35,9 @@ public class Lecture {
     private List<Material> materials = new ArrayList<>();
     
     @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LectureMaterial> lectureMaterials = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
     
     public Lecture() {
@@ -92,6 +95,24 @@ public class Lecture {
     
     public void removeMaterial(Material material) {
         materials.remove(material);
+        material.setLecture(null);
+    }
+    
+    public List<LectureMaterial> getLectureMaterials() {
+        return lectureMaterials;
+    }
+    
+    public void setLectureMaterials(List<LectureMaterial> lectureMaterials) {
+        this.lectureMaterials = lectureMaterials;
+    }
+    
+    public void addLectureMaterial(LectureMaterial material) {
+        lectureMaterials.add(material);
+        material.setLecture(this);
+    }
+    
+    public void removeLectureMaterial(LectureMaterial material) {
+        lectureMaterials.remove(material);
         material.setLecture(null);
     }
     

@@ -102,9 +102,9 @@ public class LectureController {
     
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/admin/lectures/{id}/upload")
-    public String uploadMaterial(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+    public String uploadMaterial(@PathVariable Long id, @RequestParam("file") MultipartFile file, @RequestParam("title") String title) {
         try {
-            lectureService.uploadMaterial(id, file);
+            lectureService.uploadMaterial(id, file, title);
             return "redirect:/lecture/" + id;
         } catch (IOException e) {
             return "redirect:/lecture/" + id + "?error=upload";
@@ -130,8 +130,10 @@ public class LectureController {
             
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + material.getFileName() + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, material.getFileType())
                     .body(resource);
         } catch (MalformedURLException e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }

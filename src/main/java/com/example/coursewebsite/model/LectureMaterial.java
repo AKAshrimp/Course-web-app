@@ -20,6 +20,9 @@ public class LectureMaterial {
     private Long id;
     
     @Column(nullable = false)
+    private String title;
+    
+    @Column(nullable = false)
     private String fileName;
     
     @Column(nullable = false)
@@ -46,6 +49,14 @@ public class LectureMaterial {
         this.uploadTime = LocalDateTime.now();
     }
     
+    public LectureMaterial(String fileName, String fileType, String filePath, String title) {
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.filePath = filePath;
+        this.title = title;
+        this.uploadTime = LocalDateTime.now();
+    }
+    
     // Getters and Setters
     public Long getId() {
         return id;
@@ -53,6 +64,14 @@ public class LectureMaterial {
     
     public void setId(Long id) {
         this.id = id;
+    }
+    
+    public String getTitle() {
+        return title;
+    }
+    
+    public void setTitle(String title) {
+        this.title = title;
     }
     
     public String getFileName() {

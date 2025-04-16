@@ -1,13 +1,5 @@
 package com.example.coursewebsite.service;
 
-import com.example.coursewebsite.model.Lecture;
-import com.example.coursewebsite.model.LectureMaterial;
-import com.example.coursewebsite.repository.LectureRepository;
-import com.example.coursewebsite.repository.LectureMaterialRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,6 +8,15 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.coursewebsite.model.Lecture;
+import com.example.coursewebsite.model.LectureMaterial;
+import com.example.coursewebsite.repository.LectureMaterialRepository;
+import com.example.coursewebsite.repository.LectureRepository;
 
 @Service
 public class LectureService {
@@ -56,7 +57,7 @@ public class LectureService {
         lectureRepository.deleteById(id);
     }
     
-    public LectureMaterial uploadMaterial(Long lectureId, MultipartFile file) throws IOException {
+    public LectureMaterial uploadMaterial(Long lectureId, MultipartFile file, String title) throws IOException {
         Optional<Lecture> optionalLecture = lectureRepository.findById(lectureId);
         if (!optionalLecture.isPresent()) {
             throw new IllegalArgumentException("课程不存在");
@@ -64,17 +65,30 @@ public class LectureService {
         
         Lecture lecture = optionalLecture.get();
         
+        // 确保目录存在
+        File uploadDirectory = new File(uploadDir);
+        if (!uploadDirectory.exists()) {
+            uploadDirectory.mkdirs();
+        }
+        
         // 生成唯一文件名
         String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
         String newFilename = UUID.randomUUID().toString() + extension;
         
+        // 获取绝对路径
+        File absolutePath = new File(uploadDir).getAbsoluteFile();
+        
         // 保存文件
-        String filePath = uploadDir + newFilename;
-        file.transferTo(new File(filePath));
+        String filePath = absolutePath.getPath() + File.separator + newFilename;
+        File destFile = new File(filePath);
+        file.transferTo(destFile);
         
         // 创建并保存LectureMaterial
-        LectureMaterial material = new LectureMaterial(originalFilename, file.getContentType(), filePath);
+        LectureMaterial material = new LectureMaterial(originalFilename, file.getContentType(), filePath, title);
         material.setLecture(lecture);
         return lectureMaterialRepository.save(material);
     }
