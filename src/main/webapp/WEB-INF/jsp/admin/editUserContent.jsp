@@ -29,7 +29,8 @@
                                 <label for="password" class="form-label">
                                     <i class="bi bi-key me-1"></i> <spring:message code="user.password" />
                                 </label>
-                                <input type="password" class="form-control" id="password" name="password" value="************">
+                                <input type="password" class="form-control" id="password" name="password" value="" placeholder="<spring:message code="user.password.edit.placeholder" />">
+                                <div class="form-text"><spring:message code="user.password.edit.help" /></div>
                             </div>
                         </div>
                         

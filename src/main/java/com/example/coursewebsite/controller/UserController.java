@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.coursewebsite.model.User;
@@ -93,6 +94,28 @@ public class UserController {
         
         userService.updateUser(existingUser);
         return "redirect:/profile?success";
+    }
+    
+    @PostMapping("/profile/change-password")
+    public String changePassword(@RequestParam("newPassword") String newPassword, 
+                                 @RequestParam("confirmPassword") String confirmPassword) {
+        // 验证密码是否匹配
+        if (!newPassword.equals(confirmPassword)) {
+            return "redirect:/profile?pwderror";
+        }
+        
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        
+        Optional<User> optionalUser = userService.getUserByUsername(username);
+        if (!optionalUser.isPresent()) {
+            return "redirect:/login";
+        }
+        
+        User existingUser = optionalUser.get();
+        userService.updateUserPassword(existingUser, newPassword);
+        
+        return "redirect:/profile?pwdsuccess";
     }
     
     @PreAuthorize("hasRole('TEACHER')")

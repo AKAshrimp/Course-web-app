@@ -1,13 +1,14 @@
 package com.example.coursewebsite.service;
 
-import com.example.coursewebsite.model.User;
-import com.example.coursewebsite.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.coursewebsite.model.User;
+import com.example.coursewebsite.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -35,12 +36,16 @@ public class UserService {
     
     public User registerNewUser(User user) {
         // 检查用户名和邮箱是否已存在
-        if (userRepository.existsByUsername(user.getUsername())) {
+        String lowercaseUsername = user.getUsername().toLowerCase();
+        if (userRepository.existsByUsername(lowercaseUsername)) {
             throw new IllegalArgumentException("用户名已存在");
         }
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("邮箱已存在");
         }
+        
+        // 设置小写用户名
+        user.setUsername(lowercaseUsername);
         
         // 加密密码
         user.setPassword(passwordEncoder.encode(user.getPassword()));

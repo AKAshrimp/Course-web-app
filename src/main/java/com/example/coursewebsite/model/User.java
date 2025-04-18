@@ -1,8 +1,18 @@
 package com.example.coursewebsite.model;
 
-import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -58,7 +68,7 @@ public class User {
     }
     
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username != null ? username.toLowerCase() : null;
     }
     
     public String getPassword() {
