@@ -108,14 +108,10 @@ gradlew.bat build
 
 ## Run with Docker Compose
 
-Create a local `.env` file first:
+Copy `.env.example` to `.env` first:
 
-```text
-MYSQL_ROOT_PASSWORD=change-me-root
-DB_NAME=coursewebsite
-DB_USERNAME=appuser
-DB_PASSWORD=change-me-app
-DB_PORT=3306
+```bash
+cp .env.example .env
 ```
 
 Then run:
