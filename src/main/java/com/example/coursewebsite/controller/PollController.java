@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,8 @@ import com.example.coursewebsite.model.Vote;
 import com.example.coursewebsite.service.CommentService;
 import com.example.coursewebsite.service.PollService;
 import com.example.coursewebsite.service.UserService;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class PollController {
@@ -131,7 +134,11 @@ public class PollController {
     
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/admin/polls/add")
-    public String addPoll(@ModelAttribute Poll poll, @RequestParam("optionText") List<String> optionTexts, RedirectAttributes redirectAttributes) {
+    public String addPoll(@Valid @ModelAttribute("poll") Poll poll, BindingResult result, @RequestParam("optionText") List<String> optionTexts, RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/addPoll";
+        }
+        
         // 清除空选项
         poll.getOptions().clear();
         
@@ -208,7 +215,7 @@ public class PollController {
     
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/admin/polls/edit/{id}")
-    public String updatePoll(@PathVariable Long id, @ModelAttribute Poll poll, 
+    public String updatePoll(@PathVariable Long id, @Valid @ModelAttribute("poll") Poll poll, BindingResult result,
                             @RequestParam(value = "optionText", required = false) List<String> optionTexts,
                             @RequestParam(value = "optionId", required = false) List<Long> optionIds,
                             @RequestParam(value = "newOptionText", required = false) List<String> newOptionTexts,
@@ -219,7 +226,16 @@ public class PollController {
         }
         
         Poll existingPoll = optionalPoll.get();
-        existingPoll.setQuestion(poll.getQuestion());
+        boolean isOptionUpdate = optionTexts != null && optionIds != null;
+        if (result.hasErrors() && !isOptionUpdate) {
+            poll.setId(id);
+            poll.setOptions(existingPoll.getOptions());
+            return "admin/editPoll";
+        }
+        
+        if (!isOptionUpdate) {
+            existingPoll.setQuestion(poll.getQuestion());
+        }
         
         // 更新现有选项
         if (optionTexts != null && optionIds != null && optionTexts.size() == optionIds.size()) {

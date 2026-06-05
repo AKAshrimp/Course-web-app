@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.coursewebsite.dto.websocket.PollUpdateMessage;
 import com.example.coursewebsite.model.Poll;
 import com.example.coursewebsite.model.PollOption;
 import com.example.coursewebsite.model.User;
@@ -21,12 +23,15 @@ public class PollService {
     private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
     private final VoteRepository voteRepository;
+    private final SimpMessagingTemplate messagingTemplate;
     
     @Autowired
-    public PollService(PollRepository pollRepository, PollOptionRepository pollOptionRepository, VoteRepository voteRepository) {
+    public PollService(PollRepository pollRepository, PollOptionRepository pollOptionRepository, VoteRepository voteRepository,
+            SimpMessagingTemplate messagingTemplate) {
         this.pollRepository = pollRepository;
         this.pollOptionRepository = pollOptionRepository;
         this.voteRepository = voteRepository;
+        this.messagingTemplate = messagingTemplate;
     }
     
     public List<Poll> getAllPolls() {
@@ -63,27 +68,30 @@ public class PollService {
     
     @Transactional
     public Vote vote(Long pollId, Long optionId, User user) {
-        Optional<Poll> optionalPoll = pollRepository.findById(pollId);
-        if (!optionalPoll.isPresent()) {
-            throw new IllegalArgumentException("投票不存在");
-        }
+        Poll poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new IllegalArgumentException("投票不存在"));
         
-        Optional<PollOption> optionalOption = pollOptionRepository.findById(optionId);
-        if (!optionalOption.isPresent()) {
-            throw new IllegalArgumentException("选项不存在");
+        PollOption option = pollOptionRepository.findById(optionId)
+                .orElseThrow(() -> new IllegalArgumentException("选项不存在"));
+        if (option.getPoll() != null && option.getPoll().getId() != null && !option.getPoll().getId().equals(pollId)) {
+            throw new IllegalArgumentException("选项不属于该投票");
         }
         
         // 检查用户是否已经投票，如果已投票则更新
         Optional<Vote> existingVote = voteRepository.findByUserIdAndPollId(user.getId(), pollId);
+        Vote savedVote;
         if (existingVote.isPresent()) {
             Vote vote = existingVote.get();
-            vote.setPollOption(optionalOption.get());
-            return voteRepository.save(vote);
+            vote.setPollOption(option);
+            savedVote = voteRepository.save(vote);
+        } else {
+            // 创建新投票
+            Vote vote = new Vote(user, poll, option);
+            savedVote = voteRepository.save(vote);
         }
         
-        // 创建新投票
-        Vote vote = new Vote(user, optionalPoll.get(), optionalOption.get());
-        return voteRepository.save(vote);
+        broadcastPollUpdate(pollId);
+        return savedVote;
     }
     
     public List<Vote> getVotesByPollId(Long pollId) {
@@ -121,5 +129,28 @@ public class PollService {
             poll.removeOption(option);
             pollRepository.save(poll);
         }
+    }
+
+    private void broadcastPollUpdate(Long pollId) {
+        List<PollOption> options = pollOptionRepository.findByPollId(pollId);
+        List<Vote> votes = voteRepository.findByPollId(pollId);
+        long totalVotes = votes.size();
+
+        List<PollUpdateMessage.OptionVoteCount> optionCounts = options.stream()
+                .map(option -> {
+                    long count = votes.stream()
+                            .filter(vote -> vote.getPollOption() != null
+                                    && vote.getPollOption().getId() != null
+                                    && vote.getPollOption().getId().equals(option.getId()))
+                            .count();
+                    double percentage = totalVotes == 0
+                            ? 0
+                            : Math.round(((double) count / totalVotes * 100.0) * 100.0) / 100.0;
+                    return new PollUpdateMessage.OptionVoteCount(option.getId(), option.getText(), count, percentage);
+                })
+                .toList();
+
+        messagingTemplate.convertAndSend("/topic/poll/" + pollId,
+                new PollUpdateMessage(pollId, totalVotes, optionCounts));
     }
 } 

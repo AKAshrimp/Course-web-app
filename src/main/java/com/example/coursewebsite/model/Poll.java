@@ -1,6 +1,10 @@
 package com.example.coursewebsite.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +18,15 @@ public class Poll {
     private Long id;
     
     @Column(nullable = false)
+    @NotBlank(message = "Poll question is required")
+    @Size(max = 255, message = "Poll question must not exceed 255 characters")
     private String question;
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Valid
     private List<PollOption> options = new ArrayList<>();
     
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,8 @@ import com.example.coursewebsite.model.User;
 import com.example.coursewebsite.service.CommentService;
 import com.example.coursewebsite.service.LectureService;
 import com.example.coursewebsite.service.UserService;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class LectureController {
@@ -82,8 +85,12 @@ public class LectureController {
     
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/admin/lectures/add")
-    public String addLecture(@ModelAttribute Lecture lecture, RedirectAttributes redirectAttributes) {
-        Lecture savedLecture = lectureService.saveLecture(lecture);
+    public String addLecture(@Valid @ModelAttribute("lecture") Lecture lecture, BindingResult result, RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/addLecture";
+        }
+        
+        lectureService.saveLecture(lecture);
         redirectAttributes.addFlashAttribute("successMessage", "lecture.add.success");
         return "redirect:/admin/dashboard";
     }
@@ -193,10 +200,15 @@ public class LectureController {
     
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/admin/lectures/edit/{id}")
-    public String updateLecture(@PathVariable Long id, @ModelAttribute Lecture lecture, RedirectAttributes redirectAttributes) {
+    public String updateLecture(@PathVariable Long id, @Valid @ModelAttribute("lecture") Lecture lecture, BindingResult result, RedirectAttributes redirectAttributes) {
         Optional<Lecture> optionalLecture = lectureService.getLectureById(id);
         if (!optionalLecture.isPresent()) {
             return "redirect:/admin/dashboard";
+        }
+        
+        if (result.hasErrors()) {
+            lecture.setId(id);
+            return "admin/editLecture";
         }
         
         Lecture existingLecture = optionalLecture.get();

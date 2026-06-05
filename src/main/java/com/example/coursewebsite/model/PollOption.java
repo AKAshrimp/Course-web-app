@@ -1,6 +1,9 @@
 package com.example.coursewebsite.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,8 @@ public class PollOption {
     private Long id;
     
     @Column(nullable = false)
+    @NotBlank(message = "Poll option text is required")
+    @Size(max = 150, message = "Poll option text must not exceed 150 characters")
     private String text;
     
     @ManyToOne

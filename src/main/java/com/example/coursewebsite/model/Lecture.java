@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "lectures")
@@ -23,9 +25,13 @@ public class Lecture {
     private Long id;
     
     @Column(nullable = false)
+    @NotBlank(message = "Lecture title is required")
+    @Size(max = 150, message = "Lecture title must not exceed 150 characters")
     private String title;
     
     @Column(nullable = false)
+    @NotBlank(message = "Lecture description is required")
+    @Size(max = 2000, message = "Lecture description must not exceed 2000 characters")
     private String description;
     
     @Column(nullable = false)

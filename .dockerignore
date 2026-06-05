@@ -1,0 +1,25 @@
+# Build artifacts
+build/
+out/
+.gradle/
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Database files (H2 dev)
+*.mv.db
+*.trace.db
+coursewebsite_db.*
+
+# Local uploads (not for image)
+uploads/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

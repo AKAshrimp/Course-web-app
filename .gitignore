@@ -1,0 +1,53 @@
+# Gradle and build output
+.gradle/
+build/
+bin/
+out/
+
+# IDE and OS files
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local environment variables
+.env
+.env.*
+
+# Local database files
+coursewebsite_db.*
+*.mv.db
+*.trace.db
+
+# Runtime uploads
+uploads/
+
+# Local/generated reports and personal notes
+*.html
+*.pdf
+*.md
+!README.md
+
+# Unrelated local coursework/demo folders
+HKMU/
+WebAppli/
+lab08tut/
+lab10ex4/
+shape/
+
+# Legacy generated artifacts
+course-web
+course-web-app
+
+# Temporary/editor files
+*.class
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+*.rej
+*.java~
+.LCK*
