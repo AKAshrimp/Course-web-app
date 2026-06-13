@@ -1,6 +1,6 @@
 # Course Web App
 
-A Spring Boot course management web application with JSP pages, role-based access, lecture materials, polls, REST APIs, Swagger UI, Flyway migrations, WebSocket poll updates, Actuator health checks, Docker support, and GitHub Actions CI.
+A Spring Boot course management web application with JSP pages, role-based access, lecture materials, polls, REST APIs, JWT admin account management, a React Admin frontend, Swagger UI, Flyway migrations, WebSocket poll updates, Actuator health checks, Docker support, and GitHub Actions CI.
 
 ## Tech Stack
 
@@ -8,10 +8,12 @@ A Spring Boot course management web application with JSP pages, role-based acces
 - Spring Boot 3.4
 - Spring MVC + JSP
 - Spring Security
+- Spring OAuth2 Resource Server / JWT
 - Spring Data JPA / Hibernate
 - H2 for local development
 - MySQL for production profile
 - Flyway
+- React + Vite + Ant Design
 - JUnit 5 + MockMvc
 - Docker / Docker Compose
 
@@ -22,6 +24,8 @@ A Spring Boot course management web application with JSP pages, role-based acces
 - Poll creation, voting, vote updates, and vote history
 - Bean Validation for form input
 - REST API under `/api/v1`
+- JWT-protected admin API under `/api/admin`
+- Independent React Admin frontend under `admin-frontend`
 - Swagger UI at `/swagger-ui.html`
 - WebSocket poll updates through `/ws` and `/topic/poll/{pollId}`
 - Actuator health and metrics endpoints
@@ -64,6 +68,7 @@ Default users are seeded on first startup:
 | OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
 | Health check | `http://localhost:8080/actuator/health` |
 | Metrics | `http://localhost:8080/actuator/metrics` |
+| React Admin | `http://localhost:5173` |
 
 H2 settings:
 
@@ -94,6 +99,45 @@ Request body:
 }
 ```
 
+## Admin Account Management
+
+The project includes a separate React Admin app for teacher-only account management.
+
+Backend admin endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/admin/auth/login` | Login with username/password and receive a JWT |
+| `GET /api/admin/users` | List users |
+| `GET /api/admin/users/{id}` | Get one user |
+| `POST /api/admin/users` | Create user |
+| `PUT /api/admin/users/{id}` | Update user profile and roles |
+| `PUT /api/admin/users/{id}/password` | Update password |
+| `DELETE /api/admin/users/{id}` | Delete user |
+
+Only users with `ROLE_TEACHER` can access the admin user APIs.
+
+Run the admin frontend:
+
+```bash
+cd admin-frontend
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+Default admin login:
+
+```text
+username: teacher
+password: password
+```
+
 ## Run Tests
 
 ```bash
@@ -122,6 +166,18 @@ docker compose up --build
 
 This starts the app with the `prod` profile and a MySQL 8 database.
 
+If port `3306` is already used on your computer, Docker exposes MySQL on host port `3307` by default:
+
+```text
+localhost:3307 -> container mysql:3306
+```
+
+To start only MySQL:
+
+```bash
+docker compose up -d db
+```
+
 ## Production Profile
 
 The production profile uses MySQL and Flyway:
@@ -138,6 +194,22 @@ DB_PORT
 DB_NAME
 DB_USERNAME
 DB_PASSWORD
+JWT_SECRET
+ADMIN_ORIGIN
+MYSQL_HOST_PORT
+```
+
+Example for running Spring Boot locally against Docker MySQL:
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE="prod"
+$env:DB_HOST="localhost"
+$env:DB_PORT="3307"
+$env:DB_NAME="coursewebsite"
+$env:DB_USERNAME="appuser"
+$env:DB_PASSWORD="apppassword"
+$env:JWT_SECRET="replace-with-at-least-32-character-secret"
+.\gradlew.bat bootRun
 ```
 
 ## Project Structure
@@ -157,3 +229,13 @@ src/main/resources/db/migration
 ```
 
 contains Flyway database migrations.
+
+Frontend structure:
+
+```text
+admin-frontend
+├── src/api
+├── src/auth
+├── src/layout
+└── src/pages
+```
