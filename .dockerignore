@@ -17,6 +17,10 @@ coursewebsite_db.*
 # Local uploads (not for image)
 uploads/
 
+# Frontend dependencies/build output
+admin-frontend/node_modules/
+admin-frontend/dist/
+
 # Logs
 *.log
 

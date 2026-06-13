@@ -24,11 +24,17 @@ coursewebsite_db.*
 # Runtime uploads
 uploads/
 
+# Frontend dependencies and build output
+admin-frontend/node_modules/
+admin-frontend/dist/
+
 # Local/generated reports and personal notes
+tutorials/
 *.html
 *.pdf
 *.md
 !README.md
+!admin-frontend/index.html
 
 # Unrelated local coursework/demo folders
 HKMU/
