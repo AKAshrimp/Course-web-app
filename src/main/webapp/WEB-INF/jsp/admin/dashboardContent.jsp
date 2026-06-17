@@ -14,7 +14,7 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header">
                 <h4 class="mb-0"><i class="bi bi-speedometer2"></i> <spring:message code="teacher.badge"/> <spring:message code="teacher.dashboard"/></h4>
             </div>
             <div class="card-body">
@@ -30,7 +30,7 @@
     <!-- 用户管理 -->
     <div class="col-md-6 mb-4">
         <div class="card h-100">
-            <div class="card-header bg-success text-white">
+            <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-people"></i> <spring:message code="teacher.manage.users"/></h5>
             </div>
             <div class="card-body">
@@ -68,7 +68,7 @@
     <!-- 课程管理 -->
     <div class="col-md-6 mb-4">
         <div class="card h-100">
-            <div class="card-header bg-info text-white">
+            <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-book"></i> <spring:message code="teacher.manage.courses"/></h5>
             </div>
             <div class="card-body">
@@ -96,7 +96,7 @@
                         </div>
                     </c:forEach>
                 </div>
-                <a href="/admin/lectures/add" class="btn btn-info mt-3 text-white">
+                <a href="/admin/lectures/add" class="btn btn-info mt-3">
                     <i class="bi bi-plus-circle"></i> <spring:message code="teacher.add.course"/>
                 </a>
             </div>
@@ -106,7 +106,7 @@
     <!-- 投票管理 -->
     <div class="col-md-12">
         <div class="card h-100">
-            <div class="card-header bg-warning text-dark">
+            <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> <spring:message code="teacher.manage.polls"/></h5>
             </div>
             <div class="card-body">

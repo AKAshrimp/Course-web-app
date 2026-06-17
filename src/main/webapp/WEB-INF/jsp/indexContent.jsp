@@ -4,11 +4,11 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <div class="text-center my-5">
-    <h1 class="fw-bold mb-3 position-relative d-inline-block">
-        <span class="position-relative" style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+    <h1 class="fw-bold mb-3 position-relative d-inline-block page-title">
+        <span class="position-relative text-gradient">
             <spring:message code="app.welcome"/>
         </span>
-        <div class="position-absolute" style="height: 4px; width: 50%; bottom: -10px; left: 25%; background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));"></div>
+        <div class="section-underline"></div>
     </h1>
     <p class="col-md-8 mx-auto fs-5 text-muted"><spring:message code="app.description"/></p>
     <sec:authorize access="!isAuthenticated()">
@@ -25,7 +25,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="bi bi-book me-2"></i>
-                    <span style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    <span class="text-gradient">
                         <spring:message code="home.courseList"/>
                     </span>
                 </h5>
@@ -71,7 +71,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="bi bi-bar-chart me-2"></i>
-                    <span style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    <span class="text-gradient">
                         <spring:message code="home.pollList"/>
                     </span>
                 </h5>

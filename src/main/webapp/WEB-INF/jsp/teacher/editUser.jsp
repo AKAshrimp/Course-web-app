@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <div class="card">
-                <div class="card-header bg-warning text-dark">
+                <div class="card-header">
                     <h3><i class="bi bi-person-gear"></i> 编辑用户</h3>
                 </div>
                 <div class="card-body">

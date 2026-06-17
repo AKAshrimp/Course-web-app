@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h3><i class="bi bi-people"></i> 用户管理</h3>
                     <a href="/teacher/users/add" class="btn btn-light">
                         <i class="bi bi-plus-circle"></i> 添加用户

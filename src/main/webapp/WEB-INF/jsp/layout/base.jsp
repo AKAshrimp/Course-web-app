@@ -132,16 +132,16 @@
     </sec:authorize>
     
     <!-- 主内容 -->
-    <div class="container my-4">
+    <div class="container my-4 app-main">
         <jsp:include page="/WEB-INF/jsp/${param.content}" />
     </div>
     
     <!-- 页脚 -->
-    <footer class="py-3 mt-auto" style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); position: fixed; bottom: 0; width: 100%;">
+    <footer class="py-3 mt-auto">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-12 text-center">
-                    <p class="mb-0 text-white">This site provides course materials and online polling features. &copy; 2025 Course Website</p>
+                    <p class="mb-0">This site provides course materials and online polling features. &copy; 2025 Course Website</p>
                 </div>
             </div>
         </div>

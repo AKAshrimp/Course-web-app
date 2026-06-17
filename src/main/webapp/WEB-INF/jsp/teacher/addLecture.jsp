@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <div class="card">
-                <div class="card-header bg-info text-white">
+                <div class="card-header">
                     <h3><i class="bi bi-plus-circle"></i> 添加新课程</h3>
                 </div>
                 <div class="card-body">
@@ -29,7 +29,7 @@
                         </div>
                         
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-info text-white">
+                            <button type="submit" class="btn btn-info">
                                 <i class="bi bi-save"></i> 创建课程
                             </button>
                             <a href="/teacher/lectures" class="btn btn-secondary">

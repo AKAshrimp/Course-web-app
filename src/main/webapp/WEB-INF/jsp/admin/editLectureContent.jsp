@@ -10,7 +10,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
                         <i class="bi bi-pencil-square me-2"></i>
-                        <span style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <span class="text-gradient">
                             <spring:message code="lecture.edit.title" />
                         </span>
                     </h4>

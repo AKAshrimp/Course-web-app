@@ -2,9 +2,9 @@
     <!-- 主内容结束 -->
     
     <!-- 页脚 -->
-    <footer class="bg-light py-3 mt-5">
+    <footer class="py-3 mt-5">
         <div class="container text-center">
-            <p class="text-muted">&copy; 2025 Course Website | 学习管理系统</p>
+            <p class="mb-0">&copy; 2025 Course Website | 学习管理系统</p>
         </div>
     </footer>
     

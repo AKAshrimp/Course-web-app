@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <div class="card">
-                <div class="card-header bg-warning text-dark">
+                <div class="card-header">
                     <h3><i class="bi bi-bar-chart-fill"></i> <spring:message code="poll.add.title"/></h3>
                 </div>
                 <div class="card-body">

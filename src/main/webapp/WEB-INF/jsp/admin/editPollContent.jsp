@@ -10,7 +10,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
                         <i class="bi bi-pencil-square me-2"></i>
-                        <span style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <span class="text-gradient">
                             <spring:message code="poll.edit.title" />
                         </span>
                     </h4>
@@ -35,10 +35,10 @@
                     </form:form>
 
                     <h4 class="mt-5 mb-3 position-relative d-inline-block">
-                        <span style="background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <span class="text-gradient">
                             <i class="bi bi-list-check me-2"></i><spring:message code="poll.options" />
                         </span>
-                        <div class="position-absolute" style="height: 2px; width: 50%; bottom: -5px; left: 0; background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));"></div>
+                        <div class="section-underline ms-0"></div>
                     </h4>
                     
                     <div id="optionsContainer">

@@ -17,17 +17,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
-    <!-- 自定义CSS -->
-    <style>
-        .required:after {
-            content: "*";
-            color: red;
-        }
-        
-        .nav-link.active {
-            font-weight: bold;
-        }
-    </style>
+    <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body>
     <!-- 导航栏 -->
@@ -81,4 +71,4 @@
     </nav>
     
     <!-- 主内容开始 -->
-    <div class="container mt-4"> 
+    <div class="container mt-4 app-main"> 

@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header">
                     <h3><i class="bi bi-speedometer2"></i> 教师管理中心</h3>
                 </div>
                 <div class="card-body">
@@ -26,7 +26,7 @@
         <!-- 用户管理卡片 -->
         <div class="col-md-4 mb-4">
             <div class="card h-100">
-                <div class="card-header bg-success text-white">
+                <div class="card-header">
                     <h4><i class="bi bi-people"></i> 用户管理</h4>
                 </div>
                 <div class="card-body">
@@ -44,7 +44,7 @@
         <!-- 课程管理卡片 -->
         <div class="col-md-4 mb-4">
             <div class="card h-100">
-                <div class="card-header bg-info text-white">
+                <div class="card-header">
                     <h4><i class="bi bi-book"></i> 课程管理</h4>
                 </div>
                 <div class="card-body">
@@ -52,7 +52,7 @@
                     <p><strong>当前课程数:</strong> ${lectures.size()}</p>
                 </div>
                 <div class="card-footer">
-                    <a href="/teacher/lectures" class="btn btn-info w-100 text-white">
+                    <a href="/teacher/lectures" class="btn btn-info w-100">
                         <i class="bi bi-book"></i> 管理课程
                     </a>
                 </div>
@@ -62,7 +62,7 @@
         <!-- 投票管理卡片 -->
         <div class="col-md-4 mb-4">
             <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
+                <div class="card-header">
                     <h4><i class="bi bi-bar-chart"></i> 投票管理</h4>
                 </div>
                 <div class="card-body">
@@ -82,7 +82,7 @@
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header">
                     <h4><i class="bi bi-activity"></i> 最近课程</h4>
                 </div>
                 <div class="card-body">

@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <div class="card">
-                <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white;">
+                <div class="card-header">
                     <h3><i class="bi bi-person-plus"></i> <spring:message code="admin.add.user" /></h3>
                 </div>
                 <div class="card-body">
@@ -59,7 +59,7 @@
                         </div>
                         
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn" style="background-color: var(--primary-color); color: white;">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save"></i> <spring:message code="button.save" />
                             </button>
                             <a href="/admin/dashboard" class="btn btn-secondary">

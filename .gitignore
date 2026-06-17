@@ -30,6 +30,7 @@ admin-frontend/dist/
 
 # Local/generated reports and personal notes
 tutorials/
+planning/
 *.html
 *.pdf
 *.md
