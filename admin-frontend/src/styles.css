@@ -429,6 +429,118 @@ a {
   color: var(--steel);
 }
 
+.user-management-grid {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.account-structure-card {
+  position: sticky;
+  top: 24px;
+}
+
+.card-header.compact {
+  margin-bottom: 14px;
+}
+
+.structure-tree {
+  display: grid;
+  gap: 8px;
+}
+
+.tree-node {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--charcoal);
+  cursor: pointer;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.tree-node.active,
+.tree-node:hover {
+  border-color: #d6b6f6;
+  background: var(--purple-soft);
+}
+
+.tree-node strong {
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.structure-note {
+  margin-top: 18px;
+  border-radius: 8px;
+  background: #fef7d6;
+  color: var(--slate);
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.users-list-card {
+  min-width: 0;
+}
+
+.user-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.3fr) minmax(160px, 0.7fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.toolbar-field {
+  display: grid;
+  gap: 6px;
+}
+
+.toolbar-field span {
+  color: var(--steel);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.users-table th:first-child,
+.users-table td:first-child {
+  width: 72px;
+}
+
+.table-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--steel);
+  font-size: 13px;
+}
+
+.pagination-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .hero-panel {
   position: relative;
   overflow: hidden;
@@ -556,5 +668,19 @@ a {
 
   .hero-panel {
     padding: 28px;
+  }
+
+  .user-management-grid,
+  .user-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .account-structure-card {
+    position: static;
+  }
+
+  .pagination-bar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
