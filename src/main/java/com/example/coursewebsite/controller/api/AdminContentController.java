@@ -28,7 +28,7 @@ import com.example.coursewebsite.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/admin/content")
+@RequestMapping("/api/teacher/content")
 @PreAuthorize("hasRole('TEACHER')")
 public class AdminContentController {
 

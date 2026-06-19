@@ -67,7 +67,7 @@ class AdminContentControllerTest {
         when(pollService.getAllPolls()).thenReturn(List.of(poll));
         when(pollService.getVotesByPollId(2L)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/admin/content/dashboard").with(user("teacher").roles("TEACHER")))
+        mockMvc.perform(get("/api/teacher/content/dashboard").with(user("teacher").roles("TEACHER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userCount").value(0))
                 .andExpect(jsonPath("$.lectures[0].id").value(1))
@@ -83,7 +83,7 @@ class AdminContentControllerTest {
         lecture.setDescription("REST APIs");
         when(lectureService.saveLecture(any(Lecture.class))).thenReturn(lecture);
 
-        mockMvc.perform(post("/api/admin/content/lectures")
+        mockMvc.perform(post("/api/teacher/content/lectures")
                         .with(user("teacher").roles("TEACHER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Week 2\",\"description\":\"REST APIs\"}"))
@@ -91,7 +91,7 @@ class AdminContentControllerTest {
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.title").value("Week 2"));
 
-        mockMvc.perform(delete("/api/admin/content/lectures/10").with(user("teacher").roles("TEACHER")))
+        mockMvc.perform(delete("/api/teacher/content/lectures/10").with(user("teacher").roles("TEACHER")))
                 .andExpect(status().isOk());
 
         verify(lectureService).deleteLecture(10L);
@@ -105,7 +105,7 @@ class AdminContentControllerTest {
         when(pollService.createPoll(any(Poll.class))).thenReturn(poll);
         when(pollService.getVotesByPollId(20L)).thenReturn(List.of());
 
-        mockMvc.perform(post("/api/admin/content/polls")
+        mockMvc.perform(post("/api/teacher/content/polls")
                         .with(user("teacher").roles("TEACHER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"question\":\"Which topic?\",\"options\":[\"Java\",\"React\"]}"))
@@ -113,7 +113,7 @@ class AdminContentControllerTest {
                 .andExpect(jsonPath("$.id").value(20))
                 .andExpect(jsonPath("$.question").value("Which topic?"));
 
-        mockMvc.perform(delete("/api/admin/content/polls/20").with(user("teacher").roles("TEACHER")))
+        mockMvc.perform(delete("/api/teacher/content/polls/20").with(user("teacher").roles("TEACHER")))
                 .andExpect(status().isOk());
 
         verify(pollService).deletePoll(20L);

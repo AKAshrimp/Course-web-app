@@ -20,6 +20,8 @@ uploads/
 # Frontend dependencies/build output
 admin-frontend/node_modules/
 admin-frontend/dist/
+course-frontend/node_modules/
+course-frontend/dist/
 
 # Logs
 *.log

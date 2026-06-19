@@ -36,20 +36,31 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174}
     ports:
       - "8080:8080"
     volumes:
       - app_uploads:/app/uploads
 
-  frontend:
+  admin-frontend:
     build:
       context: ./admin-frontend
-    container_name: coursewebsite-frontend
+    container_name: coursewebsite-admin-frontend
     restart: unless-stopped
     depends_on:
       - app
     ports:
-      - "${FRONTEND_HOST_PORT:-5173}:5173"
+      - "${ADMIN_FRONTEND_HOST_PORT:-5173}:5173"
+
+  course-frontend:
+    build:
+      context: ./course-frontend
+    container_name: coursewebsite-course-frontend
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${COURSE_FRONTEND_HOST_PORT:-5174}:5174"
 
   redis:
     image: redis:7-alpine

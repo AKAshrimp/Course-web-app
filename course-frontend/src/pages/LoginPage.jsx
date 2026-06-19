@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
 
@@ -25,12 +25,7 @@ export default function LoginPage() {
 
     try {
       const result = await auth.login(username, password);
-      if (result.roles?.includes("ROLE_TEACHER")) {
-        navigate("/users");
-      } else {
-        auth.logout();
-        setError("Admin access requires a teacher account.");
-      }
+      navigate(result.roles?.includes("ROLE_TEACHER") ? "/dashboard" : "/");
     } catch (error) {
       setError("Login failed. Please check your username and password.");
     } finally {
@@ -42,8 +37,8 @@ export default function LoginPage() {
     <main className="login-shell">
       <section className="login-card notion-card">
         <div className="login-title">
-          <h1>Admin Console</h1>
-          <p>Sign in with a teacher account</p>
+          <h1>Course Workspace</h1>
+          <p>Sign in with a student or teacher account</p>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
@@ -68,6 +63,9 @@ export default function LoginPage() {
           <button className="btn btn-primary btn-block" type="submit" disabled={loading}>
             {loading ? "Signing in..." : "Login"}
           </button>
+          <Link className="auth-link" to="/register">
+            Need a student account? Register
+          </Link>
         </form>
       </section>
     </main>

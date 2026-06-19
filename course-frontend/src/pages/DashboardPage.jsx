@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { createLecture, createPoll, deleteLecture, deletePoll, getDashboard } from "../api/adminContentApi";
+import { createLecture, createPoll, deleteLecture, deletePoll, getDashboard } from "../api/teacherContentApi";
 import AdminLayout from "../layout/AdminLayout";
 
 export default function DashboardPage() {

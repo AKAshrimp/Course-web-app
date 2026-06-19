@@ -27,6 +27,8 @@ uploads/
 # Frontend dependencies and build output
 admin-frontend/node_modules/
 admin-frontend/dist/
+course-frontend/node_modules/
+course-frontend/dist/
 
 # Local/generated reports and personal notes
 tutorials/
@@ -36,6 +38,7 @@ planning/
 *.md
 !README.md
 !admin-frontend/index.html
+!course-frontend/index.html
 
 # Unrelated local coursework/demo folders
 HKMU/
