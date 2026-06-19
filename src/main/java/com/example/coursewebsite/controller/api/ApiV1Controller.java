@@ -18,6 +18,7 @@ import com.example.coursewebsite.dto.api.CommentRequestDto;
 import com.example.coursewebsite.dto.api.LectureDetailDto;
 import com.example.coursewebsite.dto.api.LectureDto;
 import com.example.coursewebsite.dto.api.MaterialDto;
+import com.example.coursewebsite.dto.api.PollDetailDto;
 import com.example.coursewebsite.dto.api.PollDto;
 import com.example.coursewebsite.dto.api.PollOptionDto;
 import com.example.coursewebsite.dto.api.VoteRequestDto;
@@ -94,6 +95,13 @@ public class ApiV1Controller {
                 .toList();
     }
 
+    @GetMapping("/polls/{pollId}")
+    public ResponseEntity<PollDetailDto> getPoll(@PathVariable Long pollId, Principal principal) {
+        return pollService.getPollById(pollId)
+                .map(poll -> ResponseEntity.ok(toPollDetailDto(poll, principal)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/polls/{pollId}/vote")
     public ResponseEntity<VoteResponseDto> vote(@PathVariable Long pollId, @Valid @RequestBody VoteRequestDto request,
             Principal principal) {
@@ -115,12 +123,54 @@ public class ApiV1Controller {
         return ResponseEntity.ok(new VoteResponseDto(pollId, optionId, updated, message));
     }
 
+    @PostMapping("/polls/{pollId}/comments")
+    public ResponseEntity<CommentDto> addPollComment(@PathVariable Long pollId,
+            @Valid @RequestBody CommentRequestDto request, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<User> optionalUser = userService.getUserByUsername(principal.getName());
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Comment comment = commentService.addPollComment(pollId, optionalUser.get(), request.content());
+        return ResponseEntity.ok(toCommentDto(comment));
+    }
+
     private PollDto toPollDto(Poll poll) {
         List<Vote> votes = pollService.getVotesByPollId(poll.getId());
         List<PollOptionDto> options = poll.getOptions().stream()
                 .map(option -> toPollOptionDto(option, votes))
                 .toList();
         return new PollDto(poll.getId(), poll.getQuestion(), poll.getCreatedAt(), options);
+    }
+
+    private PollDetailDto toPollDetailDto(Poll poll, Principal principal) {
+        List<Vote> votes = pollService.getVotesByPollId(poll.getId());
+        List<PollOptionDto> options = poll.getOptions().stream()
+                .map(option -> toPollOptionDto(option, votes))
+                .toList();
+        List<CommentDto> comments = commentService.getPollComments(poll.getId()).stream()
+                .map(this::toCommentDto)
+                .toList();
+        Long userVoteOptionId = resolveUserVoteOptionId(poll.getId(), principal);
+
+        return new PollDetailDto(poll.getId(), poll.getQuestion(), poll.getCreatedAt(), options, comments,
+                userVoteOptionId);
+    }
+
+    private Long resolveUserVoteOptionId(Long pollId, Principal principal) {
+        if (principal == null) {
+            return null;
+        }
+
+        return userService.getUserByUsername(principal.getName())
+                .flatMap(user -> pollService.getUserVoteOnPoll(user.getId(), pollId))
+                .map(Vote::getPollOption)
+                .map(PollOption::getId)
+                .orElse(null);
     }
 
     private PollOptionDto toPollOptionDto(PollOption option, List<Vote> votes) {

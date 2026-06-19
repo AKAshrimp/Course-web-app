@@ -18,3 +18,21 @@ export function addLectureComment(lectureId, content) {
 export function getPolls() {
   return apiRequest("/api/v1/polls");
 }
+
+export function getPoll(pollId) {
+  return apiRequest(`/api/v1/polls/${pollId}`);
+}
+
+export function votePoll(pollId, optionId) {
+  return apiRequest(`/api/v1/polls/${pollId}/vote`, {
+    method: "POST",
+    body: JSON.stringify({ optionId })
+  });
+}
+
+export function addPollComment(pollId, content) {
+  return apiRequest(`/api/v1/polls/${pollId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ content })
+  });
+}

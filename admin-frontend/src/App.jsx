@@ -4,6 +4,7 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import LectureDetailPage from "./pages/LectureDetailPage";
 import LoginPage from "./pages/LoginPage";
+import PollDetailPage from "./pages/PollDetailPage";
 import RegisterPage from "./pages/RegisterPage";
 import UserFormPage from "./pages/UserFormPage";
 import UsersPage from "./pages/UsersPage";
@@ -26,6 +27,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <LectureDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/polls/:id"
+        element={
+          <ProtectedRoute>
+            <PollDetailPage />
           </ProtectedRoute>
         }
       />

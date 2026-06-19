@@ -668,7 +668,14 @@ a {
     var(--canvas);
 }
 
-.lecture-main-card h1 {
+.poll-main-card {
+  background:
+    radial-gradient(circle at 86% 18%, rgba(26, 174, 57, 0.13), transparent 24%),
+    var(--canvas);
+}
+
+.lecture-main-card h1,
+.poll-main-card h1 {
   max-width: 860px;
   margin: 16px 0 8px;
   color: var(--ink);
@@ -770,6 +777,70 @@ a {
   color: var(--charcoal);
   line-height: 1.6;
   white-space: pre-wrap;
+}
+
+.poll-options-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.poll-option-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  cursor: pointer;
+  padding: 16px;
+}
+
+.poll-option-card:hover,
+.poll-option-card.selected {
+  border-color: #9fd7ad;
+  background: var(--green-soft);
+}
+
+.poll-option-card input {
+  margin-top: 3px;
+}
+
+.poll-option-body {
+  display: grid;
+  gap: 10px;
+}
+
+.poll-option-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.poll-option-header strong {
+  color: var(--charcoal);
+}
+
+.poll-option-header span {
+  color: var(--steel);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.poll-bar {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(15, 15, 15, 0.08);
+}
+
+.poll-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--success);
+  transition: width 180ms ease;
 }
 
 @media (max-width: 860px) {

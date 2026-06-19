@@ -133,6 +133,43 @@ class ApiV1ControllerTest {
     }
 
     @Test
+    void getPollDetailReturnsOptionsCommentsAndCurrentUserVote() throws Exception {
+        Poll poll = new Poll("Which topic?");
+        poll.setId(1L);
+        poll.setCreatedAt(LocalDateTime.of(2026, 6, 5, 10, 0));
+        PollOption javaOption = new PollOption("Java", poll);
+        javaOption.setId(10L);
+        PollOption reactOption = new PollOption("React", poll);
+        reactOption.setId(11L);
+        poll.setOptions(List.of(javaOption, reactOption));
+
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+        user.setFullName("Kelvin Chan");
+        Vote vote = new Vote(user, poll, javaOption);
+        Comment comment = new Comment("React please", user);
+        comment.setId(20L);
+        comment.setCreatedAt(LocalDateTime.of(2026, 6, 5, 12, 0));
+
+        when(pollService.getPollById(1L)).thenReturn(Optional.of(poll));
+        when(pollService.getVotesByPollId(1L)).thenReturn(List.of(vote));
+        when(commentService.getPollComments(1L)).thenReturn(List.of(comment));
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(pollService.getUserVoteOnPoll(5L, 1L)).thenReturn(Optional.of(vote));
+
+        mockMvc.perform(get("/api/v1/polls/1").with(user("student").roles("STUDENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.question").value("Which topic?"))
+                .andExpect(jsonPath("$.userVoteOptionId").value(10))
+                .andExpect(jsonPath("$.options[0].id").value(10))
+                .andExpect(jsonPath("$.options[0].voteCount").value(1))
+                .andExpect(jsonPath("$.comments[0].authorName").value("Kelvin Chan"))
+                .andExpect(jsonPath("$.comments[0].content").value("React please"));
+    }
+
+    @Test
     void authenticatedUserCanVoteThroughApi() throws Exception {
         User user = new User();
         user.setId(5L);
@@ -180,6 +217,30 @@ class ApiV1ControllerTest {
                 .andExpect(jsonPath("$.authorName").value("Kelvin Chan"));
 
         verify(commentService).addLectureComment(1L, user, "Looks good");
+    }
+
+    @Test
+    void authenticatedUserCanAddPollCommentThroughApi() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+        user.setFullName("Kelvin Chan");
+        Comment savedComment = new Comment("React please", user);
+        savedComment.setId(12L);
+        savedComment.setCreatedAt(LocalDateTime.of(2026, 6, 5, 13, 0));
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(commentService.addPollComment(1L, user, "React please")).thenReturn(savedComment);
+
+        mockMvc.perform(post("/api/v1/polls/1/comments")
+                        .with(user("student").roles("STUDENT"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"React please\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(12))
+                .andExpect(jsonPath("$.content").value("React please"))
+                .andExpect(jsonPath("$.authorName").value("Kelvin Chan"));
+
+        verify(commentService).addPollComment(1L, user, "React please");
     }
 
     @Test
