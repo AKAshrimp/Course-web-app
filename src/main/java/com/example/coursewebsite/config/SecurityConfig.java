@@ -35,7 +35,8 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/h2-console/**")
                 .disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console/**", "/api/admin/auth/login").permitAll()
+                .requestMatchers("/h2-console/**", "/api/admin/auth/login", "/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
                 .requestMatchers("/api/admin/**").authenticated()
                 .anyRequest().permitAll()
             )

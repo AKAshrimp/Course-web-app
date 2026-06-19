@@ -41,8 +41,8 @@ export default function AdminLayout({ children, title, subtitle }) {
             {subtitle && <p>{subtitle}</p>}
           </div>
           <div className="header-user">
-            <span className="avatar">{auth.username?.charAt(0).toUpperCase()}</span>
-            <span className="header-username">{auth.username}</span>
+            <span className="avatar">{(auth.fullName || auth.username)?.charAt(0).toUpperCase()}</span>
+            <span className="header-username">{auth.fullName || auth.username}</span>
             <button className="btn btn-secondary" type="button" onClick={handleLogout}>
               Logout
             </button>

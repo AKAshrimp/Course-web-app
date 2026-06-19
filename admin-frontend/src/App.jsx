@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import UserFormPage from "./pages/UserFormPage";
 import UsersPage from "./pages/UsersPage";
 
@@ -18,10 +19,11 @@ export default function App() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/users"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="ROLE_TEACHER">
             <UsersPage />
           </ProtectedRoute>
         }
@@ -29,7 +31,7 @@ export default function App() {
       <Route
         path="/users/new"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="ROLE_TEACHER">
             <UserFormPage />
           </ProtectedRoute>
         }
@@ -37,7 +39,7 @@ export default function App() {
       <Route
         path="/users/:id"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute role="ROLE_TEACHER">
             <UserFormPage />
           </ProtectedRoute>
         }
