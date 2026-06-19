@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { deleteUser, getUsers } from "../api/adminUsersApi";
@@ -12,12 +12,30 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 1,
+    teacherCount: 0,
+    studentCount: 0
+  });
 
-  async function loadUsers() {
+  async function loadUsers({ nextPage = page, nextSearch = search, nextRole = roleFilter } = {}) {
     setLoading(true);
 
     try {
-      setUsers(await getUsers());
+      const result = await getUsers({
+        page: nextPage,
+        size: pageSize,
+        search: nextSearch.trim(),
+        role: nextRole
+      });
+      setUsers(result.items || []);
+      setPagination({
+        total: result.total || 0,
+        totalPages: Math.max(1, result.totalPages || 1),
+        teacherCount: result.teacherCount || 0,
+        studentCount: result.studentCount || 0
+      });
     } catch (error) {
       setNotice({ type: "error", text: "Failed to load users." });
     } finally {
@@ -42,38 +60,32 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [page, roleFilter]);
 
-  const filteredUsers = useMemo(() => {
-    const searchText = search.trim().toLowerCase();
-
-    return users.filter((user) => {
-      const matchesSearch =
-        !searchText ||
-        [user.username, user.fullName, user.email, user.phoneNumber]
-          .filter(Boolean)
-          .some((value) => value.toLowerCase().includes(searchText));
-      const matchesRole = roleFilter === "ALL" || (user.roles || []).includes(roleFilter);
-
-      return matchesSearch && matchesRole;
-    });
-  }, [roleFilter, search, users]);
-
-  const teacherCount = users.filter((user) => (user.roles || []).includes("ROLE_TEACHER")).length;
-  const studentCount = users.filter((user) => (user.roles || []).includes("ROLE_STUDENT")).length;
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const totalPages = pagination.totalPages;
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
-  const pageUsers = filteredUsers.slice(pageStart, pageStart + pageSize);
 
   function updateSearch(value) {
     setSearch(value);
-    setPage(1);
   }
 
   function updateRoleFilter(value) {
     setRoleFilter(value);
     setPage(1);
+  }
+
+  function submitSearch(event) {
+    event.preventDefault();
+    setPage(1);
+    loadUsers({ nextPage: 1 });
+  }
+
+  function resetFilters() {
+    setSearch("");
+    setRoleFilter("ALL");
+    setPage(1);
+    loadUsers({ nextPage: 1, nextSearch: "", nextRole: "ALL" });
   }
 
   return (
@@ -88,17 +100,29 @@ export default function UsersPage() {
           </div>
 
           <div className="structure-tree">
-            <button className="tree-node active" type="button" onClick={() => updateRoleFilter("ALL")}>
+            <button
+              className={`tree-node ${roleFilter === "ALL" ? "active" : ""}`}
+              type="button"
+              onClick={() => updateRoleFilter("ALL")}
+            >
               <span>All users</span>
-              <strong>{users.length}</strong>
+              <strong>{pagination.total}</strong>
             </button>
-            <button className="tree-node" type="button" onClick={() => updateRoleFilter("ROLE_TEACHER")}>
+            <button
+              className={`tree-node ${roleFilter === "ROLE_TEACHER" ? "active" : ""}`}
+              type="button"
+              onClick={() => updateRoleFilter("ROLE_TEACHER")}
+            >
               <span>Teachers</span>
-              <strong>{teacherCount}</strong>
+              <strong>{pagination.teacherCount}</strong>
             </button>
-            <button className="tree-node" type="button" onClick={() => updateRoleFilter("ROLE_STUDENT")}>
+            <button
+              className={`tree-node ${roleFilter === "ROLE_STUDENT" ? "active" : ""}`}
+              type="button"
+              onClick={() => updateRoleFilter("ROLE_STUDENT")}
+            >
               <span>Students</span>
-              <strong>{studentCount}</strong>
+              <strong>{pagination.studentCount}</strong>
             </button>
           </div>
 
@@ -112,8 +136,8 @@ export default function UsersPage() {
             <div>
               <h3>User List</h3>
               <p>
-                Showing {filteredUsers.length === 0 ? 0 : pageStart + 1}-
-                {Math.min(pageStart + pageSize, filteredUsers.length)} of {filteredUsers.length} matched users
+                Showing {pagination.total === 0 ? 0 : pageStart + 1}-
+                {Math.min(pageStart + users.length, pagination.total)} of {pagination.total} matched users
               </p>
             </div>
             <Link className="btn btn-primary" to="/users/new">
@@ -121,7 +145,7 @@ export default function UsersPage() {
             </Link>
           </div>
 
-          <div className="user-toolbar">
+          <form className="user-toolbar" onSubmit={submitSearch}>
             <label className="toolbar-field">
               <span>Keyword</span>
               <input
@@ -143,16 +167,21 @@ export default function UsersPage() {
                 <option value="ROLE_TEACHER">Teacher</option>
               </select>
             </label>
-            <button className="btn btn-secondary" type="button" onClick={() => updateSearch("")}>
-              Reset
-            </button>
-          </div>
+            <div className="toolbar-actions">
+              <button className="btn btn-primary" type="submit">
+                Search
+              </button>
+              <button className="btn btn-secondary" type="button" onClick={resetFilters}>
+                Reset
+              </button>
+            </div>
+          </form>
 
           {notice && <div className={`alert alert-${notice.type}`}>{notice.text}</div>}
 
           {loading ? (
             <div className="empty-state">Loading users...</div>
-          ) : filteredUsers.length === 0 ? (
+          ) : users.length === 0 ? (
             <div className="empty-state">No users found.</div>
           ) : (
             <>
@@ -170,7 +199,7 @@ export default function UsersPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {pageUsers.map((user) => (
+                    {users.map((user) => (
                       <tr key={user.id}>
                         <td>
                           <span className="table-avatar">{user.username?.charAt(0).toUpperCase()}</span>
@@ -211,7 +240,7 @@ export default function UsersPage() {
 
               <div className="pagination-bar">
                 <span>
-                  Page {safePage} of {totalPages}, {pageSize} per page
+                  Page {safePage} of {totalPages}, loading {users.length} users per request
                 </span>
                 <div className="pagination-actions">
                   <button

@@ -1,7 +1,14 @@
 import { apiRequest } from "./client";
 
-export function getUsers() {
-  return apiRequest("/api/admin/users");
+export function getUsers({ page = 1, size = 10, search = "", role = "ALL" } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+    search,
+    role
+  });
+
+  return apiRequest(`/api/admin/users?${params.toString()}`);
 }
 
 export function getUser(id) {

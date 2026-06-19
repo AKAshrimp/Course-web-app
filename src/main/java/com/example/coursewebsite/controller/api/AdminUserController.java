@@ -1,7 +1,5 @@
 package com.example.coursewebsite.controller.api;
 
-import java.util.List;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +8,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.coursewebsite.dto.admin.AdminPasswordUpdateRequest;
+import com.example.coursewebsite.dto.admin.AdminUserPageResponse;
 import com.example.coursewebsite.dto.admin.AdminUserRequest;
 import com.example.coursewebsite.dto.admin.AdminUserResponse;
 import com.example.coursewebsite.service.AdminAccountService;
@@ -31,8 +31,12 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public List<AdminUserResponse> getUsers() {
-        return adminAccountService.getAllUsers();
+    public AdminUserPageResponse getUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "ALL") String role) {
+        return adminAccountService.getUsersPage(page, size, search, role);
     }
 
     @GetMapping("/{id}")

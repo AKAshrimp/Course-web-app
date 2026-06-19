@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.coursewebsite.config.SecurityConfig;
 import com.example.coursewebsite.dto.admin.AdminUserRequest;
+import com.example.coursewebsite.dto.admin.AdminUserPageResponse;
 import com.example.coursewebsite.dto.admin.AdminUserResponse;
 import com.example.coursewebsite.service.AdminAccountService;
 
@@ -42,17 +43,29 @@ class AdminUserControllerTest {
 
     @Test
     void getUsersReturnsAdminUserResponses() throws Exception {
-        when(adminAccountService.getAllUsers()).thenReturn(List.of(
-                new AdminUserResponse(1L, "teacher", "Teacher One", "teacher@example.com", "123", Set.of("ROLE_TEACHER"))));
+        when(adminAccountService.getUsersPage(1, 10, "", "ALL")).thenReturn(new AdminUserPageResponse(
+                List.of(new AdminUserResponse(1L, "teacher", "Teacher One", "teacher@example.com", "123", Set.of("ROLE_TEACHER"))),
+                10003,
+                1,
+                10,
+                1001,
+                1,
+                10002));
 
-        mockMvc.perform(get("/api/admin/users")
+        mockMvc.perform(get("/api/admin/users?page=1&size=10&search=&role=ALL")
                         .with(user("teacher").roles("TEACHER")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].username").value("teacher"))
-                .andExpect(jsonPath("$[0].fullName").value("Teacher One"))
-                .andExpect(jsonPath("$[0].email").value("teacher@example.com"))
-                .andExpect(jsonPath("$[0].roles[0]").value("ROLE_TEACHER"));
+                .andExpect(jsonPath("$.items[0].id").value(1))
+                .andExpect(jsonPath("$.items[0].username").value("teacher"))
+                .andExpect(jsonPath("$.items[0].fullName").value("Teacher One"))
+                .andExpect(jsonPath("$.items[0].email").value("teacher@example.com"))
+                .andExpect(jsonPath("$.items[0].roles[0]").value("ROLE_TEACHER"))
+                .andExpect(jsonPath("$.total").value(10003))
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalPages").value(1001))
+                .andExpect(jsonPath("$.teacherCount").value(1))
+                .andExpect(jsonPath("$.studentCount").value(10002));
     }
 
     @Test
