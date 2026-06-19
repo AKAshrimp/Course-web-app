@@ -20,6 +20,10 @@ export default function AdminLayout({ children, title, subtitle }) {
           <p>Account Management</p>
         </div>
         <nav className="side-nav" aria-label="Admin navigation">
+          <Link className={`side-nav-link ${location.pathname === "/" ? "active" : ""}`} to="/">
+            <span aria-hidden="true">🏠</span>
+            Home
+          </Link>
           <Link
             className={`side-nav-link ${location.pathname.startsWith("/users") ? "active" : ""}`}
             to="/users"

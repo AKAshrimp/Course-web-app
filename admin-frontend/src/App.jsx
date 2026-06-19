@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import UserFormPage from "./pages/UserFormPage";
 import UsersPage from "./pages/UsersPage";
@@ -8,6 +9,14 @@ import UsersPage from "./pages/UsersPage";
 export default function App() {
   return (
     <Routes>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/users"
@@ -33,7 +42,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/users" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

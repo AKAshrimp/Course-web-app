@@ -429,6 +429,105 @@ a {
   color: var(--steel);
 }
 
+.hero-panel {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255, 100, 200, 0.28), transparent 18%),
+    radial-gradient(circle at 82% 18%, rgba(245, 215, 94, 0.28), transparent 16%),
+    radial-gradient(circle at 72% 82%, rgba(42, 157, 153, 0.22), transparent 20%),
+    var(--brand-navy);
+  color: #fff;
+  padding: 44px;
+}
+
+.hero-panel .eyebrow {
+  display: inline-flex;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-panel h1 {
+  max-width: 780px;
+  margin: 0;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1.08;
+}
+
+.hero-panel p {
+  max-width: 680px;
+  margin: 16px 0 0;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.content-card {
+  display: grid;
+  gap: 18px;
+  min-height: 178px;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.content-card-sky {
+  background: #dcecfa;
+}
+
+.content-card-mint {
+  background: #d9f3e1;
+}
+
+.content-card h4 {
+  margin: 12px 0 8px;
+  color: var(--charcoal);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.content-card p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--slate);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.content-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--steel);
+  font-size: 13px;
+}
+
 @media (max-width: 860px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -449,5 +548,13 @@ a {
 
   .card-header {
     flex-direction: column;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-panel {
+    padding: 28px;
   }
 }
