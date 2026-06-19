@@ -26,6 +26,15 @@ export default function AdminLayout({ children, title, subtitle }) {
           </Link>
           {auth.isTeacher && (
             <Link
+              className={`side-nav-link ${location.pathname.startsWith("/dashboard") ? "active" : ""}`}
+              to="/dashboard"
+            >
+              <span aria-hidden="true">■</span>
+              Dashboard
+            </Link>
+          )}
+          {auth.isTeacher && (
+            <Link
               className={`side-nav-link ${location.pathname.startsWith("/users") ? "active" : ""}`}
               to="/users"
             >

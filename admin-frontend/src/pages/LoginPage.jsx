@@ -25,7 +25,7 @@ export default function LoginPage() {
 
     try {
       const result = await auth.login(username, password);
-      navigate(result.roles?.includes("ROLE_TEACHER") ? "/users" : "/");
+      navigate(result.roles?.includes("ROLE_TEACHER") ? "/dashboard" : "/");
     } catch (error) {
       setError("Login failed. Please check your username and password.");
     } finally {

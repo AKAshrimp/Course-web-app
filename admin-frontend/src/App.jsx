@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
+import DashboardPage from "./pages/DashboardPage";
 import HomePage from "./pages/HomePage";
 import LectureDetailPage from "./pages/LectureDetailPage";
 import LoginPage from "./pages/LoginPage";
@@ -23,6 +24,14 @@ export default function App() {
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute role="ROLE_TEACHER">
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/lectures/:id"
         element={
