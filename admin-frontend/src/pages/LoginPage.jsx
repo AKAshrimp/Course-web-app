@@ -1,26 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, Form, Input, Typography, message } from "antd";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-
 import { useAuth } from "../auth/AuthContext";
-
-const { Text, Title } = Typography;
 
 export default function LoginPage() {
   const auth = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  async function handleSubmit(values) {
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const username = formData.get("username")?.trim();
+    const password = formData.get("password");
+
+    if (!username || !password) {
+      setError("Please enter username and password.");
+      return;
+    }
+
     setLoading(true);
+    setError("");
 
     try {
-      await auth.login(values.username, values.password);
+      await auth.login(username, password);
       navigate("/users");
     } catch (error) {
-      message.error("Login failed. Please check the account and role.");
+      setError("Login failed. Please check the account and role.");
     } finally {
       setLoading(false);
     }
@@ -28,34 +35,36 @@ export default function LoginPage() {
 
   return (
     <main className="login-shell">
-      <Card className="login-card">
+      <section className="login-card notion-card">
         <div className="login-title">
-          <Title level={2}>Course Admin</Title>
-          <Text type="secondary">Sign in with a teacher account</Text>
+          <h1>Course Admin</h1>
+          <p>Sign in with a teacher account</p>
         </div>
 
-        <Form layout="vertical" onFinish={handleSubmit} requiredMark={false}>
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please enter username" }]}
-          >
-            <Input prefix={<UserOutlined />} placeholder="teacher" size="large" />
-          </Form.Item>
+        {error && <div className="alert alert-error">{error}</div>}
 
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please enter password" }]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="password" size="large" />
-          </Form.Item>
+        <form className="notion-form" onSubmit={handleSubmit}>
+          <label className="form-field">
+            <span>Username</span>
+            <input className="field-input" name="username" placeholder="teacher" autoComplete="username" />
+          </label>
 
-          <Button block type="primary" htmlType="submit" size="large" loading={loading}>
-            Login
-          </Button>
-        </Form>
-      </Card>
+          <label className="form-field">
+            <span>Password</span>
+            <input
+              className="field-input"
+              name="password"
+              type="password"
+              placeholder="password"
+              autoComplete="current-password"
+            />
+          </label>
+
+          <button className="btn btn-primary btn-block" type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Login"}
+          </button>
+        </form>
+      </section>
     </main>
   );
 }

@@ -1,12 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { LogoutOutlined, TeamOutlined } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu, Typography } from "antd";
-
 import { useAuth } from "../auth/AuthContext";
-
-const { Content, Header, Sider } = Layout;
-const { Text, Title } = Typography;
 
 export default function AdminLayout({ children, title, subtitle }) {
   const auth = useAuth();
@@ -19,43 +13,40 @@ export default function AdminLayout({ children, title, subtitle }) {
   }
 
   return (
-    <Layout className="admin-layout">
-      <Sider breakpoint="lg" collapsedWidth="0" className="admin-sider">
+    <div className="admin-layout">
+      <aside className="admin-sider">
         <div className="brand">
-          <Title level={4}>Course Admin</Title>
-          <Text>Account Management</Text>
+          <h1>Course Admin</h1>
+          <p>Account Management</p>
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[location.pathname.startsWith("/users") ? "users" : ""]}
-          items={[
-            {
-              key: "users",
-              icon: <TeamOutlined />,
-              label: <Link to="/users">Users</Link>
-            }
-          ]}
-        />
-      </Sider>
+        <nav className="side-nav" aria-label="Admin navigation">
+          <Link
+            className={`side-nav-link ${location.pathname.startsWith("/users") ? "active" : ""}`}
+            to="/users"
+          >
+            <span aria-hidden="true">👥</span>
+            Users
+          </Link>
+        </nav>
+      </aside>
 
-      <Layout>
-        <Header className="admin-header">
+      <section className="admin-main">
+        <header className="admin-header">
           <div>
-            <Title level={3}>{title}</Title>
-            {subtitle && <Text type="secondary">{subtitle}</Text>}
+            <h2>{title}</h2>
+            {subtitle && <p>{subtitle}</p>}
           </div>
           <div className="header-user">
-            <Avatar>{auth.username?.charAt(0).toUpperCase()}</Avatar>
-            <Text>{auth.username}</Text>
-            <Button icon={<LogoutOutlined />} onClick={handleLogout}>
+            <span className="avatar">{auth.username?.charAt(0).toUpperCase()}</span>
+            <span className="header-username">{auth.username}</span>
+            <button className="btn btn-secondary" type="button" onClick={handleLogout}>
               Logout
-            </Button>
+            </button>
           </div>
-        </Header>
+        </header>
 
-        <Content className="admin-content">{children}</Content>
-      </Layout>
-    </Layout>
+        <main className="admin-content">{children}</main>
+      </section>
+    </div>
   );
 }

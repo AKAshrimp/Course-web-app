@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Button, Card, Popconfirm, Space, Table, Tag, message } from "antd";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-
 import { deleteUser, getUsers } from "../api/adminUsersApi";
 import AdminLayout from "../layout/AdminLayout";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState(null);
 
   async function loadUsers() {
     setLoading(true);
@@ -17,19 +15,24 @@ export default function UsersPage() {
     try {
       setUsers(await getUsers());
     } catch (error) {
-      message.error("Failed to load users.");
+      setNotice({ type: "error", text: "Failed to load users." });
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDelete(id) {
+  async function handleDelete(user) {
+    const confirmed = window.confirm(`Delete ${user.username}?`);
+    if (!confirmed) {
+      return;
+    }
+
     try {
-      await deleteUser(id);
-      message.success("User deleted");
+      await deleteUser(user.id);
+      setNotice({ type: "success", text: "User deleted." });
       await loadUsers();
     } catch (error) {
-      message.error("Failed to delete user.");
+      setNotice({ type: "error", text: "Failed to delete user." });
     }
   }
 
@@ -37,83 +40,76 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
-  const columns = [
-    {
-      title: "Username",
-      dataIndex: "username",
-      key: "username"
-    },
-    {
-      title: "Full name",
-      dataIndex: "fullName",
-      key: "fullName"
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email"
-    },
-    {
-      title: "Phone",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber"
-    },
-    {
-      title: "Roles",
-      dataIndex: "roles",
-      key: "roles",
-      render: (roles = []) => (
-        <Space wrap>
-          {roles.map((role) => (
-            <Tag color={role === "ROLE_TEACHER" ? "blue" : "green"} key={role}>
-              {role.replace("ROLE_", "")}
-            </Tag>
-          ))}
-        </Space>
-      )
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, user) => (
-        <Space>
-          <Button icon={<EditOutlined />}>
-            <Link to={`/users/${user.id}`}>Edit</Link>
-          </Button>
-          <Popconfirm
-            title="Delete user?"
-            description={`Delete ${user.username}?`}
-            okText="Delete"
-            okButtonProps={{ danger: true }}
-            onConfirm={() => handleDelete(user.id)}
-          >
-            <Button danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      )
-    }
-  ];
-
   return (
     <AdminLayout title="Users" subtitle="Manage student and teacher accounts">
-      <Card
-        title="Account List"
-        extra={
-          <Button type="primary" icon={<PlusOutlined />}>
-            <Link to="/users/new">New User</Link>
-          </Button>
-        }
-      >
-        <Table
-          columns={columns}
-          dataSource={users}
-          loading={loading}
-          rowKey="id"
-          pagination={{ pageSize: 8 }}
-        />
-      </Card>
+      <section className="notion-card">
+        <div className="card-header">
+          <div>
+            <h3>Account List</h3>
+            <p>{users.length} accounts in this workspace</p>
+          </div>
+          <Link className="btn btn-primary" to="/users/new">
+            + New User
+          </Link>
+        </div>
+
+        {notice && <div className={`alert alert-${notice.type}`}>{notice.text}</div>}
+
+        {loading ? (
+          <div className="empty-state">Loading users...</div>
+        ) : users.length === 0 ? (
+          <div className="empty-state">No users found.</div>
+        ) : (
+          <div className="table-wrap">
+            <table className="notion-table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Full name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Roles</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td>
+                      <strong>{user.username}</strong>
+                    </td>
+                    <td>{user.fullName}</td>
+                    <td>{user.email}</td>
+                    <td>{user.phoneNumber || "—"}</td>
+                    <td>
+                      <div className="badge-row">
+                        {(user.roles || []).map((role) => (
+                          <span
+                            className={`badge ${role === "ROLE_TEACHER" ? "badge-purple" : "badge-green"}`}
+                            key={role}
+                          >
+                            {role.replace("ROLE_", "")}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="action-row">
+                        <Link className="btn btn-secondary btn-sm" to={`/users/${user.id}`}>
+                          Edit
+                        </Link>
+                        <button className="btn btn-danger btn-sm" type="button" onClick={() => handleDelete(user)}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </AdminLayout>
   );
 }

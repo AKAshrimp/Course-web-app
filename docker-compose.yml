@@ -41,6 +41,25 @@ services:
     volumes:
       - app_uploads:/app/uploads
 
+  redis:
+    image: redis:7-alpine
+    container_name: coursewebsite-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   db_data:
   app_uploads:
+  redis_data:

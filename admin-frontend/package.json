@@ -5,9 +5,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/icons": "^6.2.5",
     "@vitejs/plugin-react": "latest",
-    "antd": "^6.4.4",
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest",
