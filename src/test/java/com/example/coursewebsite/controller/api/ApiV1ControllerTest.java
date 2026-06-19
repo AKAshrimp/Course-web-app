@@ -23,11 +23,14 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.coursewebsite.config.SecurityConfig;
+import com.example.coursewebsite.model.Comment;
 import com.example.coursewebsite.model.Lecture;
+import com.example.coursewebsite.model.LectureMaterial;
 import com.example.coursewebsite.model.Poll;
 import com.example.coursewebsite.model.PollOption;
 import com.example.coursewebsite.model.User;
 import com.example.coursewebsite.model.Vote;
+import com.example.coursewebsite.service.CommentService;
 import com.example.coursewebsite.service.LectureService;
 import com.example.coursewebsite.service.PollService;
 import com.example.coursewebsite.service.UserService;
@@ -41,6 +44,9 @@ class ApiV1ControllerTest {
 
     @MockBean
     private LectureService lectureService;
+
+    @MockBean
+    private CommentService commentService;
 
     @MockBean
     private PollService pollService;
@@ -67,6 +73,40 @@ class ApiV1ControllerTest {
                 .andExpect(jsonPath("$[0].description").value("Introduction"))
                 .andExpect(jsonPath("$[0].materials").doesNotExist())
                 .andExpect(jsonPath("$[0].comments").doesNotExist());
+    }
+
+    @Test
+    void getLectureDetailReturnsMaterialsAndComments() throws Exception {
+        Lecture lecture = new Lecture();
+        lecture.setId(1L);
+        lecture.setTitle("Week 1");
+        lecture.setDescription("Introduction");
+        lecture.setCreatedAt(LocalDateTime.of(2026, 6, 5, 10, 0));
+
+        LectureMaterial material = new LectureMaterial("slides.pdf", "application/pdf", "/tmp/slides.pdf", "Slides");
+        material.setId(2L);
+        material.setUploadTime(LocalDateTime.of(2026, 6, 5, 11, 0));
+
+        User author = new User();
+        author.setFullName("Kelvin Chan");
+        Comment comment = new Comment("Great lecture", author);
+        comment.setId(3L);
+        comment.setCreatedAt(LocalDateTime.of(2026, 6, 5, 12, 0));
+
+        when(lectureService.getLectureById(1L)).thenReturn(Optional.of(lecture));
+        when(lectureService.getMaterialsByLectureId(1L)).thenReturn(List.of(material));
+        when(commentService.getLectureComments(1L)).thenReturn(List.of(comment));
+
+        mockMvc.perform(get("/api/v1/lectures/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Week 1"))
+                .andExpect(jsonPath("$.materials[0].id").value(2))
+                .andExpect(jsonPath("$.materials[0].title").value("Slides"))
+                .andExpect(jsonPath("$.materials[0].fileName").value("slides.pdf"))
+                .andExpect(jsonPath("$.comments[0].id").value(3))
+                .andExpect(jsonPath("$.comments[0].authorName").value("Kelvin Chan"))
+                .andExpect(jsonPath("$.comments[0].content").value("Great lecture"));
     }
 
     @Test
@@ -116,6 +156,30 @@ class ApiV1ControllerTest {
                 .andExpect(jsonPath("$.message").value("Vote submitted successfully"));
 
         verify(pollService).vote(1L, 10L, user);
+    }
+
+    @Test
+    void authenticatedUserCanAddLectureCommentThroughApi() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+        user.setFullName("Kelvin Chan");
+        Comment savedComment = new Comment("Looks good", user);
+        savedComment.setId(9L);
+        savedComment.setCreatedAt(LocalDateTime.of(2026, 6, 5, 12, 30));
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(commentService.addLectureComment(1L, user, "Looks good")).thenReturn(savedComment);
+
+        mockMvc.perform(post("/api/v1/lectures/1/comments")
+                        .with(user("student").roles("STUDENT"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"Looks good\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(9))
+                .andExpect(jsonPath("$.content").value("Looks good"))
+                .andExpect(jsonPath("$.authorName").value("Kelvin Chan"));
+
+        verify(commentService).addLectureComment(1L, user, "Looks good");
     }
 
     @Test
