@@ -36,3 +36,18 @@ export function addPollComment(pollId, content) {
     body: JSON.stringify({ content })
   });
 }
+
+export function getProfile() {
+  return apiRequest("/api/v1/profile");
+}
+
+export function updateProfile(profile) {
+  return apiRequest("/api/v1/profile", {
+    method: "PUT",
+    body: JSON.stringify(profile)
+  });
+}
+
+export function getMyVotes() {
+  return apiRequest("/api/v1/me/votes");
+}

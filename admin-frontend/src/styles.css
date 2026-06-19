@@ -843,6 +843,51 @@ a {
   transition: width 180ms ease;
 }
 
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.vote-list {
+  display: grid;
+  gap: 12px;
+}
+
+.vote-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  padding: 14px 16px;
+}
+
+.vote-item:hover {
+  border-color: var(--hairline-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.vote-item strong,
+.vote-item span {
+  display: block;
+}
+
+.vote-item strong {
+  color: var(--charcoal);
+  font-size: 15px;
+}
+
+.vote-item div > span,
+.vote-item > span {
+  margin-top: 4px;
+  color: var(--steel);
+  font-size: 13px;
+}
+
 @media (max-width: 860px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -874,7 +919,8 @@ a {
   }
 
   .user-management-grid,
-  .user-toolbar {
+  .user-toolbar,
+  .profile-grid {
     grid-template-columns: 1fr;
   }
 

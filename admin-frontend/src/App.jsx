@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage";
 import LectureDetailPage from "./pages/LectureDetailPage";
 import LoginPage from "./pages/LoginPage";
 import PollDetailPage from "./pages/PollDetailPage";
+import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import UserFormPage from "./pages/UserFormPage";
 import UsersPage from "./pages/UsersPage";
@@ -35,6 +36,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <PollDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

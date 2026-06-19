@@ -16,20 +16,26 @@ export default function AdminLayout({ children, title, subtitle }) {
     <div className="admin-layout">
       <aside className="admin-sider">
         <div className="brand">
-          <h1>Course Admin</h1>
-          <p>Account Management</p>
+          <h1>Course Workspace</h1>
+          <p>Lectures, polls, and accounts</p>
         </div>
         <nav className="side-nav" aria-label="Admin navigation">
           <Link className={`side-nav-link ${location.pathname === "/" ? "active" : ""}`} to="/">
-            <span aria-hidden="true">🏠</span>
+            <span aria-hidden="true">⌂</span>
             Home
           </Link>
-          <Link
-            className={`side-nav-link ${location.pathname.startsWith("/users") ? "active" : ""}`}
-            to="/users"
-          >
-            <span aria-hidden="true">👥</span>
-            Users
+          {auth.isTeacher && (
+            <Link
+              className={`side-nav-link ${location.pathname.startsWith("/users") ? "active" : ""}`}
+              to="/users"
+            >
+              <span aria-hidden="true">●</span>
+              Users
+            </Link>
+          )}
+          <Link className={`side-nav-link ${location.pathname.startsWith("/profile") ? "active" : ""}`} to="/profile">
+            <span aria-hidden="true">○</span>
+            Profile
           </Link>
         </nav>
       </aside>

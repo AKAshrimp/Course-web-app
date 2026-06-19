@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -241,6 +242,63 @@ class ApiV1ControllerTest {
                 .andExpect(jsonPath("$.authorName").value("Kelvin Chan"));
 
         verify(commentService).addPollComment(1L, user, "React please");
+    }
+
+    @Test
+    void authenticatedUserCanReadAndUpdateProfileThroughApi() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+        user.setFullName("Kelvin Chan");
+        user.setEmail("kelvin@example.com");
+        user.setPhoneNumber("91234567");
+        user.addRole("ROLE_STUDENT");
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(userService.updateUser(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        mockMvc.perform(get("/api/v1/profile").with(user("student").roles("STUDENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("student"))
+                .andExpect(jsonPath("$.fullName").value("Kelvin Chan"))
+                .andExpect(jsonPath("$.email").value("kelvin@example.com"))
+                .andExpect(jsonPath("$.phoneNumber").value("91234567"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_STUDENT"));
+
+        mockMvc.perform(put("/api/v1/profile")
+                        .with(user("student").roles("STUDENT"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"fullName\":\"Kelvin Wong\",\"email\":\"kelvin.wong@example.com\",\"phoneNumber\":\"81234567\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fullName").value("Kelvin Wong"))
+                .andExpect(jsonPath("$.email").value("kelvin.wong@example.com"))
+                .andExpect(jsonPath("$.phoneNumber").value("81234567"));
+
+        verify(userService).updateUser(user);
+    }
+
+    @Test
+    void authenticatedUserCanReadVotesThroughApi() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+        Poll poll = new Poll("Which topic?");
+        poll.setId(1L);
+        poll.setCreatedAt(LocalDateTime.of(2026, 6, 5, 10, 0));
+        PollOption option = new PollOption("Java", poll);
+        option.setId(10L);
+        Vote vote = new Vote(user, poll, option);
+        vote.setId(20L);
+        vote.setVotedAt(LocalDateTime.of(2026, 6, 5, 13, 0));
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(pollService.getUserVotes(5L)).thenReturn(List.of(vote));
+
+        mockMvc.perform(get("/api/v1/me/votes").with(user("student").roles("STUDENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(20))
+                .andExpect(jsonPath("$[0].pollId").value(1))
+                .andExpect(jsonPath("$[0].pollQuestion").value("Which topic?"))
+                .andExpect(jsonPath("$[0].optionId").value(10))
+                .andExpect(jsonPath("$[0].optionText").value("Java"));
     }
 
     @Test

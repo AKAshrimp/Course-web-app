@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,9 @@ import com.example.coursewebsite.dto.api.MaterialDto;
 import com.example.coursewebsite.dto.api.PollDetailDto;
 import com.example.coursewebsite.dto.api.PollDto;
 import com.example.coursewebsite.dto.api.PollOptionDto;
+import com.example.coursewebsite.dto.api.ProfileDto;
+import com.example.coursewebsite.dto.api.ProfileUpdateRequestDto;
+import com.example.coursewebsite.dto.api.UserVoteDto;
 import com.example.coursewebsite.dto.api.VoteRequestDto;
 import com.example.coursewebsite.dto.api.VoteResponseDto;
 import com.example.coursewebsite.model.Comment;
@@ -139,6 +143,43 @@ public class ApiV1Controller {
         return ResponseEntity.ok(toCommentDto(comment));
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<ProfileDto> getProfile(Principal principal) {
+        return findCurrentUser(principal)
+                .map(user -> ResponseEntity.ok(toProfileDto(user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<ProfileDto> updateProfile(@Valid @RequestBody ProfileUpdateRequestDto request,
+            Principal principal) {
+        Optional<User> optionalUser = findCurrentUser(principal);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = optionalUser.get();
+        user.setFullName(request.fullName());
+        user.setEmail(request.email());
+        user.setPhoneNumber(request.phoneNumber());
+        User updated = userService.updateUser(user);
+
+        return ResponseEntity.ok(toProfileDto(updated));
+    }
+
+    @GetMapping("/me/votes")
+    public ResponseEntity<List<UserVoteDto>> getMyVotes(Principal principal) {
+        Optional<User> optionalUser = findCurrentUser(principal);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<UserVoteDto> votes = pollService.getUserVotes(optionalUser.get().getId()).stream()
+                .map(this::toUserVoteDto)
+                .toList();
+        return ResponseEntity.ok(votes);
+    }
+
     private PollDto toPollDto(Poll poll) {
         List<Vote> votes = pollService.getVotesByPollId(poll.getId());
         List<PollOptionDto> options = poll.getOptions().stream()
@@ -215,5 +256,34 @@ public class ApiV1Controller {
                 comment.getContent(),
                 authorName,
                 comment.getCreatedAt());
+    }
+
+    private Optional<User> findCurrentUser(Principal principal) {
+        if (principal == null) {
+            return Optional.empty();
+        }
+
+        return userService.getUserByUsername(principal.getName());
+    }
+
+    private ProfileDto toProfileDto(User user) {
+        return new ProfileDto(
+                user.getUsername(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                List.copyOf(user.getRoles()));
+    }
+
+    private UserVoteDto toUserVoteDto(Vote vote) {
+        Poll poll = vote.getPoll();
+        PollOption option = vote.getPollOption();
+        return new UserVoteDto(
+                vote.getId(),
+                poll != null ? poll.getId() : null,
+                poll != null ? poll.getQuestion() : null,
+                option != null ? option.getId() : null,
+                option != null ? option.getText() : null,
+                vote.getVotedAt());
     }
 }
