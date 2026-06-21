@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+import com.example.coursewebsite.service.TokenSessionService;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 @Configuration
@@ -27,10 +28,11 @@ public class JwtConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder() {
+    public JwtDecoder jwtDecoder(TokenSessionService tokenSessionService) {
         SecretKey key = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
-        return NimbusJwtDecoder.withSecretKey(key)
+        JwtDecoder delegate = NimbusJwtDecoder.withSecretKey(key)
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
+        return new RedisJwtDecoder(delegate, tokenSessionService);
     }
 }

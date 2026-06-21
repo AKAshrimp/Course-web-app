@@ -13,3 +13,9 @@ export function register(user) {
     body: JSON.stringify(user)
   });
 }
+
+export function logout() {
+  return apiRequest("/api/auth/logout", {
+    method: "POST"
+  });
+}

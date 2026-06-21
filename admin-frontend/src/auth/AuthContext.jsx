@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 
-import { login as loginRequest } from "../api/authApi";
+import { login as loginRequest, logout as logoutRequest } from "../api/authApi";
 
 const AuthContext = createContext(null);
 
@@ -23,15 +23,19 @@ export function AuthProvider({ children }) {
     return result;
   }
 
-  function logout() {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUsername");
-    localStorage.removeItem("adminFullName");
-    localStorage.removeItem("adminRoles");
-    setToken(null);
-    setUsername(null);
-    setFullName(null);
-    setRoles([]);
+  async function logout() {
+    try {
+      await logoutRequest();
+    } finally {
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminUsername");
+      localStorage.removeItem("adminFullName");
+      localStorage.removeItem("adminRoles");
+      setToken(null);
+      setUsername(null);
+      setFullName(null);
+      setRoles([]);
+    }
   }
 
   const value = useMemo(

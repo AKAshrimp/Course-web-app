@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +21,7 @@ import com.example.coursewebsite.dto.api.LoginRequest;
 import com.example.coursewebsite.dto.api.RegisterRequest;
 import com.example.coursewebsite.model.User;
 import com.example.coursewebsite.service.JwtTokenService;
+import com.example.coursewebsite.service.TokenSessionService;
 import com.example.coursewebsite.service.UserService;
 
 import jakarta.validation.Valid;
@@ -29,14 +32,17 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
+    private final TokenSessionService tokenSessionService;
     private final UserService userService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             JwtTokenService jwtTokenService,
+            TokenSessionService tokenSessionService,
             UserService userService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
+        this.tokenSessionService = tokenSessionService;
         this.userService = userService;
     }
 
@@ -85,7 +91,10 @@ public class AuthController {
 
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout() {
+    public void logout(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt != null && jwt.getId() != null) {
+            tokenSessionService.deleteActiveToken(jwt.getId());
+        }
     }
 
     private AuthResponse toResponse(User user, String token) {
