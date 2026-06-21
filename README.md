@@ -51,7 +51,7 @@ flowchart LR
     Security --> Redis[(Redis\nactive token cache)]
     API --> MySQL[(MySQL\nprod profile)]
     API --> H2[(H2\nlocal dev)]
-    API --> WebSocket[WebSocket /ws\n/topic/poll/{pollId}]
+    API --> WebSocket["WebSocket /ws<br/>/topic/poll/{pollId}"]
 ```
 
 ### Auth flow
