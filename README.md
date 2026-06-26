@@ -11,7 +11,7 @@ A full-stack online learning platform with Spring Boot REST APIs, React frontend
 ![Redis](https://img.shields.io/badge/Redis-7-red)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
 
-[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Quick start](#quick-start) · [API reference](#api-reference) · [Testing](#testing)
+[Overview](#overview) · [Features](#features) · [Architecture](#architecture) · [Quick start](#quick-start) · [CI/CD](#cicd) · [API reference](#api-reference) · [Testing](#testing)
 
 </div>
 
@@ -34,7 +34,7 @@ The backend is a Spring Boot application exposing REST APIs secured with Spring 
 | Admin frontend | User listing, creation, editing, password updates, and deletion | `AdminUserController`, `admin-frontend/src/pages` |
 | Auth | Spring Security, BCrypt passwords, JWT login, Redis-backed active token cache, logout invalidation | `SecurityConfig`, `JwtTokenService`, `TokenSessionService`, `RedisJwtDecoder` |
 | Realtime updates | Backend WebSocket support for poll result updates | `WebSocketConfig`, `PollUpdateMessage` |
-| Operations | Docker Compose for app, MySQL, Redis, admin frontend, and course frontend | `docker-compose.yml`, `Dockerfile` |
+| Operations | Docker Compose for app, MySQL, Redis, admin frontend, course frontend, and GitHub Actions CI/CD | `docker-compose.yml`, `Dockerfile`, `.github/workflows/ci.yml` |
 
 ## Architecture
 
@@ -271,6 +271,21 @@ Poll updates are published to:
 
 The message payload is `PollUpdateMessage`, which includes the poll id, total votes, and per-option vote counts and percentages.
 
+## CI/CD
+
+GitHub Actions runs the project pipeline from `.github/workflows/ci.yml`.
+
+| Trigger | What runs |
+| --- | --- |
+| Pull request to `main` | Backend Gradle build, both frontend production builds, and Docker image build checks |
+| Push to `main` | Same checks, then Docker images are published to GitHub Container Registry |
+
+The workflow has three jobs:
+
+- `backend`: sets up Java 17 and runs `./gradlew build`.
+- `frontend`: uses a matrix to build both `admin-frontend` and `course-frontend` with Node.js 22.
+- `docker`: builds backend, admin frontend, and course frontend Docker images after the app builds pass.
+
 ## Testing
 
 Backend test suite:
@@ -295,7 +310,7 @@ cd ../course-frontend
 npm run build
 ```
 
-GitHub Actions runs `./gradlew build` on pushes and pull requests to `main`.
+GitHub Actions runs backend, frontend, and Docker build checks on pull requests and pushes to `main`.
 
 ## Troubleshooting
 
