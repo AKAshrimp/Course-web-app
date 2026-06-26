@@ -1,9 +1,13 @@
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
+export function apiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
 
 export async function apiRequest(path, options = {}) {
   const token = localStorage.getItem("adminToken");
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(apiUrl(path), {
     ...options,
     headers: {
       "Content-Type": "application/json",

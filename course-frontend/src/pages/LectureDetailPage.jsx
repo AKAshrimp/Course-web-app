@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { addLectureComment, getLecture } from "../api/publicContentApi";
+import { apiUrl } from "../api/client";
 import AdminLayout from "../layout/AdminLayout";
-
-const API_BASE_URL = "http://localhost:8080";
 
 function formatDate(value) {
   if (!value) {
@@ -100,7 +99,7 @@ export default function LectureDetailPage() {
             {lecture.materials?.length ? (
               <div className="resource-list">
                 {lecture.materials.map((material) => (
-                  <a className="resource-item" key={material.id} href={`${API_BASE_URL}/lecture/material/${material.id}/download`}>
+                  <a className="resource-item" key={material.id} href={apiUrl(`/lecture/material/${material.id}/download`)}>
                     <div>
                       <strong>{material.title || material.fileName}</strong>
                       <span>{material.fileName}</span>
