@@ -19,11 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.coursewebsite.config.SecurityConfig;
+import com.example.coursewebsite.model.Course;
 import com.example.coursewebsite.model.Comment;
 import com.example.coursewebsite.model.Lecture;
 import com.example.coursewebsite.model.LectureMaterial;
@@ -32,6 +35,8 @@ import com.example.coursewebsite.model.PollOption;
 import com.example.coursewebsite.model.User;
 import com.example.coursewebsite.model.Vote;
 import com.example.coursewebsite.service.CommentService;
+import com.example.coursewebsite.service.CourseService;
+import com.example.coursewebsite.service.CartService;
 import com.example.coursewebsite.service.LectureService;
 import com.example.coursewebsite.service.PollService;
 import com.example.coursewebsite.service.UserService;
@@ -56,7 +61,123 @@ class ApiV1ControllerTest {
     private UserService userService;
 
     @MockBean
+    private CourseService courseService;
+
+    @MockBean
+    private CartService cartService;
+
+    @MockBean
     private JwtDecoder jwtDecoder;
+
+    @Test
+    void getPopularCoursesReturnsFourItemPage() throws Exception {
+        Course course = new Course();
+        course.setId(1070968L);
+        course.setTitle("React for beginners");
+        course.setPaid(true);
+        course.setPrice(13.99);
+        course.setSubscriberCount(2147);
+        course.setReviewCount(916);
+        course.setLectureCount(51);
+        course.setLevel("Beginner");
+        course.setContentDuration(8.5);
+        course.setPublishedAt(LocalDateTime.of(2017, 1, 18, 20, 58, 58));
+        course.setSubject("Web Development");
+
+        when(courseService.getPopularCourses(PageRequest.of(0, 4)))
+                .thenReturn(new PageImpl<>(List.of(course), PageRequest.of(0, 4), 12));
+
+        mockMvc.perform(get("/api/v1/courses/popular?page=0&size=4"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].id").value(1070968))
+                .andExpect(jsonPath("$.items[0].title").value("React for beginners"))
+                .andExpect(jsonPath("$.items[0].paid").value(true))
+                .andExpect(jsonPath("$.items[0].price").value(13.99))
+                .andExpect(jsonPath("$.items[0].subscriberCount").value(2147))
+                .andExpect(jsonPath("$.items[0].reviewCount").value(916))
+                .andExpect(jsonPath("$.items[0].lectureCount").value(51))
+                .andExpect(jsonPath("$.items[0].level").value("Beginner"))
+                .andExpect(jsonPath("$.items[0].contentDuration").value(8.5))
+                .andExpect(jsonPath("$.items[0].subject").value("Web Development"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(4))
+                .andExpect(jsonPath("$.total").value(12))
+                .andExpect(jsonPath("$.totalPages").value(3));
+    }
+
+    @Test
+    void getCoursesReturnsSubjectFilteredPage() throws Exception {
+        Course course = new Course();
+        course.setId(625204L);
+        course.setTitle("The Web Developer Bootcamp");
+        course.setPaid(true);
+        course.setPrice(200);
+        course.setSubscriberCount(121584);
+        course.setReviewCount(27445);
+        course.setLectureCount(342);
+        course.setLevel("All Levels");
+        course.setContentDuration(43);
+        course.setPublishedAt(LocalDateTime.of(2015, 11, 2, 21, 13, 27));
+        course.setSubject("Web Development");
+
+        when(courseService.getCoursesBySubject("Web Development", PageRequest.of(0, 4)))
+                .thenReturn(new PageImpl<>(List.of(course), PageRequest.of(0, 4), 1200));
+
+        mockMvc.perform(get("/api/v1/courses")
+                        .queryParam("subject", "Web Development")
+                        .queryParam("page", "0")
+                        .queryParam("size", "4"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].id").value(625204))
+                .andExpect(jsonPath("$.items[0].title").value("The Web Developer Bootcamp"))
+                .andExpect(jsonPath("$.items[0].subject").value("Web Development"))
+                .andExpect(jsonPath("$.items[0].subscriberCount").value(121584))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(4))
+                .andExpect(jsonPath("$.total").value(1200))
+                .andExpect(jsonPath("$.totalPages").value(300));
+    }
+
+    @Test
+    void authenticatedUserCanReadPersistentCart() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+
+        Course course = course(625204L, "The Web Developer Bootcamp", 200, 27445);
+
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(cartService.getCartCourses(user)).thenReturn(List.of(course));
+
+        mockMvc.perform(get("/api/v1/cart").with(user("student").roles("STUDENT")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].id").value(625204))
+                .andExpect(jsonPath("$.items[0].title").value("The Web Developer Bootcamp"))
+                .andExpect(jsonPath("$.items[0].price").value(200))
+                .andExpect(jsonPath("$.total").value(200))
+                .andExpect(jsonPath("$.count").value(1));
+    }
+
+    @Test
+    void authenticatedUserCanAddCourseToCart() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("student");
+
+        Course course = course(625204L, "The Web Developer Bootcamp", 200, 27445);
+
+        when(userService.getUserByUsername("student")).thenReturn(Optional.of(user));
+        when(cartService.addCourse(user, 625204L)).thenReturn(List.of(course));
+
+        mockMvc.perform(post("/api/v1/cart/items")
+                        .with(user("student").roles("STUDENT"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"courseId\":625204}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].id").value(625204))
+                .andExpect(jsonPath("$.total").value(200))
+                .andExpect(jsonPath("$.count").value(1));
+    }
 
     @Test
     void getLecturesReturnsCompactJsonDtos() throws Exception {
@@ -307,5 +428,21 @@ class ApiV1ControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"optionId\":10}"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    private Course course(Long id, String title, double price, int reviewCount) {
+        Course course = new Course();
+        course.setId(id);
+        course.setTitle(title);
+        course.setPaid(price > 0);
+        course.setPrice(price);
+        course.setSubscriberCount(121584);
+        course.setReviewCount(reviewCount);
+        course.setLectureCount(342);
+        course.setLevel("All Levels");
+        course.setContentDuration(43);
+        course.setPublishedAt(LocalDateTime.of(2015, 11, 2, 21, 13, 27));
+        course.setSubject("Web Development");
+        return course;
     }
 }

@@ -1,11 +1,25 @@
 import { apiRequest } from "./client";
 
+export function getPopularCourses(page = 0, size = 4) {
+  return apiRequest(`/api/v1/courses/popular?page=${page}&size=${size}`, { auth: false });
+}
+
+export function getCoursesBySubject(subject, page = 0, size = 4) {
+  const params = new URLSearchParams({
+    subject,
+    page: String(page),
+    size: String(size)
+  });
+
+  return apiRequest(`/api/v1/courses?${params.toString()}`, { auth: false });
+}
+
 export function getLectures() {
-  return apiRequest("/api/v1/lectures");
+  return apiRequest("/api/v1/lectures", { auth: false });
 }
 
 export function getLecture(lectureId) {
-  return apiRequest(`/api/v1/lectures/${lectureId}`);
+  return apiRequest(`/api/v1/lectures/${lectureId}`, { auth: false });
 }
 
 export function addLectureComment(lectureId, content) {
@@ -16,7 +30,7 @@ export function addLectureComment(lectureId, content) {
 }
 
 export function getPolls() {
-  return apiRequest("/api/v1/polls");
+  return apiRequest("/api/v1/polls", { auth: false });
 }
 
 export function getPoll(pollId) {

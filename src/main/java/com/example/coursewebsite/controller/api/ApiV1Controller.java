@@ -4,18 +4,27 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.coursewebsite.dto.api.CommentDto;
 import com.example.coursewebsite.dto.api.CommentRequestDto;
+import com.example.coursewebsite.dto.api.CartItemRequest;
+import com.example.coursewebsite.dto.api.CartResponse;
+import com.example.coursewebsite.dto.api.CartSyncRequest;
+import com.example.coursewebsite.dto.api.CoursePageResponse;
+import com.example.coursewebsite.dto.api.CourseSummaryDto;
 import com.example.coursewebsite.dto.api.LectureDetailDto;
 import com.example.coursewebsite.dto.api.LectureDto;
 import com.example.coursewebsite.dto.api.MaterialDto;
@@ -28,6 +37,7 @@ import com.example.coursewebsite.dto.api.UserVoteDto;
 import com.example.coursewebsite.dto.api.VoteRequestDto;
 import com.example.coursewebsite.dto.api.VoteResponseDto;
 import com.example.coursewebsite.model.Comment;
+import com.example.coursewebsite.model.Course;
 import com.example.coursewebsite.model.Lecture;
 import com.example.coursewebsite.model.LectureMaterial;
 import com.example.coursewebsite.model.Poll;
@@ -35,6 +45,8 @@ import com.example.coursewebsite.model.PollOption;
 import com.example.coursewebsite.model.User;
 import com.example.coursewebsite.model.Vote;
 import com.example.coursewebsite.service.CommentService;
+import com.example.coursewebsite.service.CourseService;
+import com.example.coursewebsite.service.CartService;
 import com.example.coursewebsite.service.LectureService;
 import com.example.coursewebsite.service.PollService;
 import com.example.coursewebsite.service.UserService;
@@ -49,13 +61,44 @@ public class ApiV1Controller {
     private final CommentService commentService;
     private final PollService pollService;
     private final UserService userService;
+    private final CourseService courseService;
+    private final CartService cartService;
 
     public ApiV1Controller(LectureService lectureService, CommentService commentService, PollService pollService,
-            UserService userService) {
+            UserService userService, CourseService courseService, CartService cartService) {
         this.lectureService = lectureService;
         this.commentService = commentService;
         this.pollService = pollService;
         this.userService = userService;
+        this.courseService = courseService;
+        this.cartService = cartService;
+    }
+
+    @GetMapping("/courses/popular")
+    public CoursePageResponse getPopularCourses(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 12);
+        Page<Course> courses = courseService.getPopularCourses(PageRequest.of(safePage, safeSize));
+        return toCoursePageResponse(courses);
+    }
+
+    @GetMapping("/courses")
+    public CoursePageResponse getCourses(@RequestParam String subject, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 12);
+        Page<Course> courses = courseService.getCoursesBySubject(subject, PageRequest.of(safePage, safeSize));
+        return toCoursePageResponse(courses);
+    }
+
+    private CoursePageResponse toCoursePageResponse(Page<Course> courses) {
+        List<CourseSummaryDto> items = courses.getContent().stream()
+                .map(this::toCourseSummaryDto)
+                .toList();
+
+        return new CoursePageResponse(items, courses.getTotalElements(), courses.getNumber(), courses.getSize(),
+                courses.getTotalPages());
     }
 
     @GetMapping("/lectures")
@@ -67,6 +110,72 @@ public class ApiV1Controller {
                         lecture.getDescription(),
                         lecture.getCreatedAt()))
                 .toList();
+    }
+
+    private CourseSummaryDto toCourseSummaryDto(Course course) {
+        return new CourseSummaryDto(
+                course.getId(),
+                course.getTitle(),
+                course.isPaid(),
+                course.getPrice(),
+                course.getSubscriberCount(),
+                course.getReviewCount(),
+                course.getLectureCount(),
+                course.getLevel(),
+                course.getContentDuration(),
+                course.getPublishedAt().toString(),
+                course.getSubject());
+    }
+
+    @GetMapping("/cart")
+    public ResponseEntity<CartResponse> getCart(Principal principal) {
+        // Persistent carts are available only for authenticated users.
+        return findCurrentUser(principal)
+                .map(user -> ResponseEntity.ok(toCartResponse(cartService.getCartCourses(user))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PostMapping("/cart/items")
+    public ResponseEntity<CartResponse> addCartItem(@Valid @RequestBody CartItemRequest request,
+            Principal principal) {
+        // Add one course and return the refreshed cart so the frontend can update immediately.
+        return findCurrentUser(principal)
+                .map(user -> ResponseEntity.ok(toCartResponse(cartService.addCourse(user, request.courseId()))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PostMapping("/cart/items/batch")
+    public ResponseEntity<CartResponse> syncCartItems(@RequestBody CartSyncRequest request, Principal principal) {
+        // Batch add is used to merge localStorage cart items after login.
+        List<Long> courseIds = request.courseIds() == null ? List.of() : request.courseIds();
+        return findCurrentUser(principal)
+                .map(user -> ResponseEntity.ok(toCartResponse(cartService.addCourses(user, courseIds))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @DeleteMapping("/cart/items/{courseId}")
+    public ResponseEntity<CartResponse> removeCartItem(@PathVariable Long courseId, Principal principal) {
+        return findCurrentUser(principal)
+                .map(user -> ResponseEntity.ok(toCartResponse(cartService.removeCourse(user, courseId))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @DeleteMapping("/cart/items")
+    public ResponseEntity<CartResponse> clearCart(Principal principal) {
+        return findCurrentUser(principal)
+                .map(user -> ResponseEntity.ok(toCartResponse(cartService.clearCart(user))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    private CartResponse toCartResponse(List<Course> courses) {
+        // Keep the cart response shape close to course list responses for frontend reuse.
+        List<CourseSummaryDto> items = courses.stream()
+                .map(this::toCourseSummaryDto)
+                .toList();
+        double total = courses.stream()
+                .mapToDouble(Course::getPrice)
+                .sum();
+        return new CartResponse(items, total, items.size());
     }
 
     @GetMapping("/lectures/{lectureId}")
